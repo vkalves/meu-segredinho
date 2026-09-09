@@ -1,255 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Abrir no navegador</title>
+
 <style>
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+:root{
+  --bg:#ffffff;
+  --surface:#f5f5f5;
+  --ink:#111111;
+  --muted:#8b9297;
+  --accent:#0088cc;
+  --accent-dark:#007ab8;
+  --line:#eeeeee;
+
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
 }
 
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(.97);
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--ink);
+}
+
+button{
+  font-family:inherit;
+}
+
+/* =========================
+   CONTEÚDO
+========================= */
+
+.wrap{
+  width:100%;
+  max-width:460px;
+  margin:0 auto;
+  padding:28px 20px 36px;
+}
+
+.kicker{
+  margin:0 0 8px;
+
+  text-align:center;
+
+  color:var(--accent);
+
+  font-size:13px;
+  font-weight:750;
+
+  letter-spacing:.02em;
+}
+
+.title{
+  margin:0 0 22px;
+
+  text-align:center;
+
+  font-size:clamp(22px, 6vw, 27px);
+  line-height:1.2;
+  font-weight:850;
+}
+
+.accent{
+  color:var(--accent);
+}
+
+
+/* =========================
+   IMAGEM DO TUTORIAL
+========================= */
+
+.mediaBox{
+  position:relative;
+
+  width:100%;
+
+  margin:0 0 28px;
+
+  overflow:hidden;
+
+  border:1px solid var(--line);
+  border-radius:16px;
+
+  background:var(--surface);
+}
+
+.tutorial-img{
+  display:block;
+
+  width:100%;
+  height:auto;
+
+  opacity:1;
+
+  transition:
+    opacity .45s ease,
+    transform .45s ease;
+}
+
+.tutorial-img.is-fading{
+  opacity:0;
+  transform:scale(.995);
+}
+
+
+/* =========================
+   PASSOS
+========================= */
+
+.steps{
+  position:relative;
+
+  margin:0 0 28px;
+  padding:0;
+
+  list-style:none;
+}
+
+.steps::before{
+  content:"";
+
+  position:absolute;
+
+  left:19px;
+  top:24px;
+  bottom:24px;
+
+  width:2px;
+
+  background:var(--line);
+}
+
+.step{
+  position:relative;
+  z-index:1;
+
+  display:flex;
+  align-items:flex-start;
+
+  gap:14px;
+}
+
+.step + .step{
+  margin-top:18px;
+}
+
+.step-num{
+  flex:0 0 40px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:40px;
+  height:40px;
+
+  border-radius:50%;
+
+  background:var(--accent);
+
+  color:#fff;
+
+  font-size:16px;
+  font-weight:850;
+
+  box-shadow:
+    0 5px 15px rgba(0,136,204,.15);
+}
+
+.step-content{
+  min-width:0;
+}
+
+.step-title{
+  margin:0;
+
+  padding-top:8px;
+
+  font-size:16px;
+  line-height:1.4;
+  font-weight:750;
+}
+
+.step-hint{
+  margin:2px 0 0;
+
+  color:var(--muted);
+
+  font-size:13px;
+  line-height:1.4;
+}
+
+
+/* =========================
+   BOTÃO TELEGRAM
+========================= */
+
+.cta{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+
+  min-height:52px;
+
+  border:0;
+  border-radius:999px;
+
+  padding:16px;
+
+  cursor:pointer;
+
+  background:var(--accent);
+
+  color:#fff;
+
+  font-size:16px;
+  font-weight:800;
+
+  box-shadow:
+    0 8px 22px rgba(0,136,204,.18);
+
+  transition:
+    transform .15s ease,
+    background .15s ease;
+}
+
+.cta:active{
+  transform:scale(.985);
+  background:var(--accent-dark);
+}
+
+
+/* ====================================================
+   AVISO
+==================================================== */
+
+@keyframes overlayIn{
+  from{
+    opacity:0;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+
+  to{
+    opacity:1;
   }
 }
 
-@keyframes iconPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(0,136,204,.18);
+@keyframes popupIn{
+  from{
+    opacity:0;
+    transform:
+      translateY(12px)
+      scale(.97);
   }
-  50% {
-    transform: scale(1.04);
-    box-shadow: 0 0 0 10px rgba(0,136,204,0);
-  }
-}
 
-@keyframes arrowMove {
-  0%, 100% {
-    transform: translateX(0);
-    opacity: .45;
-  }
-  50% {
-    transform: translateX(5px);
-    opacity: 1;
+  to{
+    opacity:1;
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
 
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(12,20,18,.24);
+@keyframes iconPulse{
+  0%,
+  100%{
+    transform:scale(1);
 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 0 0 0
+      rgba(0,136,204,.16);
+  }
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  50%{
+    transform:scale(1.035);
 
-  z-index: 9999;
-  padding: 20px;
-
-  animation: fadeIn .22s ease-out;
+    box-shadow:
+      0 0 0 11px
+      rgba(0,136,204,0);
+  }
 }
 
-.overlay.is-closing {
-  opacity: 0;
-  transition: opacity .18s ease;
+@keyframes arrowMove{
+  0%,
+  100%{
+    transform:translateX(0);
+    opacity:.35;
+  }
+
+  50%{
+    transform:translateX(5px);
+    opacity:1;
+  }
 }
 
-.popup {
-  width: 100%;
-  max-width: 350px;
 
-  background: rgba(255,255,255,.97);
-  border: 1px solid rgba(17,17,17,.06);
+/* FUNDO DESFOCADO */
 
-  border-radius: 24px;
-  padding: 22px 20px 18px;
+.overlay{
+  position:fixed;
 
-  text-align: center;
+  inset:0;
 
-  box-shadow: 0 22px 60px rgba(18,24,27,.20);
+  z-index:9999;
 
-  animation: popIn .32s cubic-bezier(.2,.8,.2,1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+
+  background:
+    rgba(10,15,18,.22);
+
+  backdrop-filter:
+    blur(13px);
+
+  -webkit-backdrop-filter:
+    blur(13px);
+
+  animation:
+    overlayIn .2s ease-out;
 }
 
-.popup-icon {
-  width: 52px;
-  height: 52px;
+.overlay.is-closing{
+  opacity:0;
 
-  margin: 0 auto 13px;
-
-  border-radius: 16px;
-
-  display: grid;
-  place-items: center;
-
-  background: rgba(0,136,204,.10);
-  color: #0088CC;
-
-  animation: iconPulse 2.4s ease-in-out infinite;
+  transition:
+    opacity .2s ease;
 }
 
-.popup-icon svg {
-  width: 27px;
-  height: 27px;
+
+/* CARD */
+
+.popup{
+  width:100%;
+  max-width:350px;
+
+  padding:
+    22px
+    20px
+    18px;
+
+  overflow:hidden;
+
+  border:
+    1px solid
+    rgba(20,30,36,.07);
+
+  border-radius:24px;
+
+  background:
+    rgba(255,255,255,.97);
+
+  text-align:center;
+
+  box-shadow:
+    0 24px 65px
+    rgba(10,20,25,.19);
+
+  animation:
+    popupIn
+    .32s
+    cubic-bezier(.2,.8,.2,1);
 }
 
-.popup-kicker {
-  display: inline-flex;
-  align-items: center;
 
-  margin-bottom: 7px;
+/* ÍCONE */
 
-  padding: 5px 9px;
+.popup-icon{
+  display:grid;
+  place-items:center;
 
-  border-radius: 999px;
+  width:54px;
+  height:54px;
 
-  background: #f3f7f9;
+  margin:
+    0 auto
+    13px;
 
-  color: #5d6870;
+  border-radius:17px;
 
-  font-size: 11px;
-  font-weight: 800;
+  background:
+    rgba(0,136,204,.10);
 
-  letter-spacing: .03em;
-  text-transform: uppercase;
+  color:var(--accent);
+
+  animation:
+    iconPulse
+    2.5s
+    ease-in-out
+    infinite;
 }
 
-.popup-title {
-  margin: 0 0 8px;
-
-  font-size: 22px;
-  line-height: 1.15;
-
-  font-weight: 850;
-
-  color: #111;
+.popup-icon svg{
+  width:28px;
+  height:28px;
 }
 
-.popup-text {
-  max-width: 285px;
 
-  margin: 0 auto 16px;
+/* SELO */
 
-  font-size: 14px;
-  line-height: 1.45;
+.popup-kicker{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 
-  color: #596168;
+  margin-bottom:8px;
 
-  font-weight: 550;
+  padding:
+    5px 10px;
+
+  border-radius:999px;
+
+  background:#f2f6f8;
+
+  color:#68737a;
+
+  font-size:11px;
+  font-weight:850;
+
+  letter-spacing:.035em;
+
+  text-transform:uppercase;
 }
 
-.popup-flow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  gap: 10px;
+/* TÍTULO */
 
-  margin-bottom: 17px;
+.popup-title{
+  margin:
+    0 0 8px;
 
-  color: #778087;
+  color:#111;
 
-  font-size: 12px;
-  font-weight: 750;
+  font-size:22px;
+  line-height:1.15;
+  font-weight:850;
 }
 
-.flow-item {
-  display: flex;
-  align-items: center;
 
-  gap: 6px;
+/* TEXTO CURTO */
+
+.popup-text{
+  max-width:285px;
+
+  margin:
+    0 auto
+    18px;
+
+  color:#60686d;
+
+  font-size:14px;
+  line-height:1.45;
+  font-weight:550;
 }
 
-.flow-icon {
-  width: 27px;
-  height: 27px;
 
-  border-radius: 9px;
+/* MINI TUTORIAL */
 
-  display: grid;
-  place-items: center;
+.popup-flow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-  background: #f3f5f6;
+  gap:9px;
 
-  color: #555f66;
+  margin-bottom:18px;
 }
 
-.flow-icon svg {
-  width: 15px;
-  height: 15px;
+.flow-item{
+  display:flex;
+  align-items:center;
+
+  gap:6px;
+
+  color:#687177;
+
+  font-size:12px;
+  font-weight:750;
 }
 
-.flow-arrow {
-  color: #0088CC;
+.flow-icon{
+  display:grid;
+  place-items:center;
 
-  font-size: 18px;
+  width:29px;
+  height:29px;
 
-  animation: arrowMove 1.4s ease-in-out infinite;
+  border-radius:9px;
+
+  background:#f3f5f6;
+
+  color:#505a61;
 }
 
-.popup-btn {
-  width: 100%;
-  min-height: 48px;
-
-  border: none;
-  border-radius: 999px;
-
-  padding: 13px 16px;
-
-  background: #0088CC;
-
-  color: white;
-
-  font-size: 15px;
-  font-weight: 800;
-
-  cursor: pointer;
-
-  box-shadow: 0 8px 20px rgba(0,136,204,.20);
-
-  transition: transform .15s ease;
+.flow-icon svg{
+  width:16px;
+  height:16px;
 }
 
-.popup-btn:active {
-  transform: scale(.985);
+.flow-arrow{
+  color:var(--accent);
+
+  font-size:19px;
+  font-weight:900;
+
+  animation:
+    arrowMove
+    1.4s
+    ease-in-out
+    infinite;
 }
 
-.popup-note {
-  margin: 9px 0 0;
 
-  color: #9aa1a6;
+/* BOTÃO DO AVISO */
 
-  font-size: 11px;
-  font-weight: 600;
+.popup-btn{
+  width:100%;
+
+  min-height:49px;
+
+  padding:
+    13px
+    16px;
+
+  border:0;
+  border-radius:999px;
+
+  cursor:pointer;
+
+  background:
+    var(--accent);
+
+  color:#fff;
+
+  font-size:15px;
+  font-weight:800;
+
+  box-shadow:
+    0 8px 22px
+    rgba(0,136,204,.20);
+
+  transition:
+    transform .15s ease,
+    background .15s ease;
 }
 
-.tutorial-img {
-  opacity: 1;
+.popup-btn:active{
+  transform:scale(.985);
 
-  transition: opacity .35s ease-in-out;
+  background:
+    var(--accent-dark);
 }
 
-.tutorial-img.is-fading {
-  opacity: 0;
+.popup-note{
+  margin:
+    10px 0 0;
+
+  color:#a0a6aa;
+
+  font-size:11px;
+  font-weight:600;
 }
 
-@media (prefers-reduced-motion: reduce) {
+
+/* REDUZ ANIMAÇÕES */
+
+@media
+(prefers-reduced-motion: reduce){
+
+  .overlay,
   .popup,
   .popup-icon,
-  .flow-arrow {
-    animation: none;
+  .flow-arrow{
+    animation:none;
+  }
+
+  .tutorial-img{
+    transition:none;
   }
 }
 </style>
+</head>
 
 
-<div class="overlay" id="popup">
+<body>
+
+
+<!-- ========================================
+     AVISO
+========================================= -->
+
+<div
+  class="overlay"
+  id="popup"
+>
 
   <div
     class="popup"
@@ -258,7 +621,11 @@
     aria-labelledby="popupTitulo"
   >
 
-    <div class="popup-icon">
+
+    <div
+      class="popup-icon"
+      aria-hidden="true"
+    >
 
       <svg
         viewBox="0 0 24 24"
@@ -268,10 +635,24 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <path d="M12 3a9 9 0 1 0 9 9"/>
-        <path d="M12 3v9h9"/>
+        <circle
+          cx="12"
+          cy="12"
+          r="9"
+        />
+
         <path
-          d="M8.5 8.5h.01M8.5 12h.01M8.5 15.5h.01"
+          d="M8 12h.01"
+          stroke-width="3"
+        />
+
+        <path
+          d="M12 12h.01"
+          stroke-width="3"
+        />
+
+        <path
+          d="M16 12h.01"
           stroke-width="3"
         />
       </svg>
@@ -298,19 +679,39 @@
     </p>
 
 
-    <div class="popup-flow">
+    <div
+      class="popup-flow"
+      aria-hidden="true"
+    >
+
 
       <span class="flow-item">
 
         <span class="flow-icon">
+
           <svg
             viewBox="0 0 24 24"
             fill="currentColor"
           >
-            <circle cx="5" cy="12" r="2"/>
-            <circle cx="12" cy="12" r="2"/>
-            <circle cx="19" cy="12" r="2"/>
+            <circle
+              cx="5"
+              cy="12"
+              r="2"
+            />
+
+            <circle
+              cx="12"
+              cy="12"
+              r="2"
+            />
+
+            <circle
+              cx="19"
+              cy="12"
+              r="2"
+            />
           </svg>
+
         </span>
 
         3 pontinhos
@@ -335,10 +736,25 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <circle cx="12" cy="12" r="9"/>
-            <path d="M3 12h18"/>
-            <path d="M12 3a15 15 0 0 1 0 18"/>
-            <path d="M12 3a15 15 0 0 0 0 18"/>
+
+            <circle
+              cx="12"
+              cy="12"
+              r="9"
+            />
+
+            <path
+              d="M3 12h18"
+            />
+
+            <path
+              d="M12 3c3 3 4.5 6 4.5 9S15 18 12 21"
+            />
+
+            <path
+              d="M12 3c-3 3-4.5 6-4.5 9S9 18 12 21"
+            />
+
           </svg>
 
         </span>
@@ -352,76 +768,270 @@
 
     <button
       class="popup-btn"
+      id="popupBtn"
       type="button"
-      onclick="fecharPopup()"
     >
       Ver tutorial
     </button>
 
 
     <p class="popup-note">
-      Leva menos de 10 segundos
+      É bem rápido
     </p>
+
 
   </div>
 
 </div>
 
 
-<script>
-function fecharPopup() {
 
-  const popup = document.getElementById("popup");
+<!-- ========================================
+     TUTORIAL
+========================================= -->
+
+<main class="wrap">
+
+
+  <p class="kicker">
+    Passo a passo
+  </p>
+
+
+  <h1 class="title">
+    Abra no
+    <span class="accent">
+      navegador
+    </span>
+    para continuar
+  </h1>
+
+
+
+  <div class="mediaBox">
+
+    <img
+      id="tutorialImagem"
+      class="tutorial-img"
+      src="tutorial1.png"
+      alt="Tutorial mostrando como abrir esta página no navegador"
+    >
+
+  </div>
+
+
+
+  <ol class="steps">
+
+
+    <li class="step">
+
+      <span class="step-num">
+        1
+      </span>
+
+      <div class="step-content">
+
+        <p class="step-title">
+          Toque nos três pontinhos
+        </p>
+
+        <p class="step-hint">
+          No canto superior direito da tela
+        </p>
+
+      </div>
+
+    </li>
+
+
+
+    <li class="step">
+
+      <span class="step-num">
+        2
+      </span>
+
+      <div class="step-content">
+
+        <p class="step-title">
+          Selecione "Abrir no navegador"
+        </p>
+
+        <p class="step-hint">
+          Depois disso, volte e abra o Telegram
+        </p>
+
+      </div>
+
+    </li>
+
+
+  </ol>
+
+
+
+  <button
+    class="cta"
+    id="telegramBtn"
+    type="button"
+  >
+    Abrir o Telegram
+  </button>
+
+
+</main>
+
+
+
+<script>
+
+/* ========================================
+   AVISO
+========================================= */
+
+const popup =
+  document.getElementById("popup");
+
+const popupBtn =
+  document.getElementById("popupBtn");
+
+
+function fecharPopup(){
 
   popup.classList.add("is-closing");
 
   setTimeout(() => {
-    popup.style.display = "none";
-  }, 180);
+
+    popup.style.display =
+      "none";
+
+  }, 200);
 
 }
 
 
-/* TROCA DAS IMAGENS DO TUTORIAL */
+popupBtn.addEventListener(
+  "click",
+  fecharPopup
+);
+
+
+
+/* ========================================
+   BOTÃO TELEGRAM
+========================================= */
+
+const telegramBtn =
+  document.getElementById(
+    "telegramBtn"
+  );
+
+
+telegramBtn.addEventListener(
+  "click",
+  () => {
+
+    window.location.href =
+      "https://t.me/becasantoss_bot";
+
+  }
+);
+
+
+
+/* ========================================
+   IMAGENS DO TUTORIAL
+========================================= */
+
+/*
+  Coloque as duas imagens na mesma pasta
+  deste HTML com estes nomes:
+
+  tutorial1.png
+  tutorial2.png
+*/
+
+const tutorialImagens = [
+
+  "tutorial1.png",
+
+  "tutorial2.png"
+
+];
+
 
 const tutorialImagem =
-  document.getElementById("tutorialImagem");
+  document.getElementById(
+    "tutorialImagem"
+  );
+
 
 let tutorialIndice = 0;
 
 
 /*
-Mantenha aqui o array tutorialImagens
-que já existe no seu HTML.
+  Cada imagem permanece na tela
+  por 4,5 segundos.
 */
 
+const tempoPorImagem =
+  4500;
 
-tutorialImagem.src =
-  tutorialImagens[0];
+
+/*
+  Tempo da transição
+  entre uma imagem e outra.
+*/
+
+const tempoFade =
+  450;
 
 
-setInterval(() => {
+function trocarImagem(){
 
-  tutorialImagem.classList.add("is-fading");
+  tutorialImagem
+    .classList
+    .add("is-fading");
 
 
   setTimeout(() => {
 
     tutorialIndice =
-      (tutorialIndice + 1) %
+      (tutorialIndice + 1)
+      %
       tutorialImagens.length;
 
 
     tutorialImagem.src =
-      tutorialImagens[tutorialIndice];
+      tutorialImagens[
+        tutorialIndice
+      ];
 
 
-    tutorialImagem.classList.remove(
-      "is-fading"
-    );
+    tutorialImagem
+      .classList
+      .remove(
+        "is-fading"
+      );
 
-  }, 350);
+  }, tempoFade);
+
+}
 
 
-}, 4500);
+if(
+  tutorialImagens.length > 1
+){
+
+  setInterval(
+    trocarImagem,
+    tempoPorImagem
+  );
+
+}
+
 </script>
+
+</body>
+</html>
