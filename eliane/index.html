@@ -89,23 +89,13 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    /* previne qualquer salto de layout durante o crossfade, mesmo com pinch-zoom */
+    /* previne qualquer salto de layout durante transições, mesmo com pinch-zoom */
     will-change: opacity;
     backface-visibility: hidden;
 }
 
 .avatar-ring:active .avatar {
     transform: translate(-50%, -50%) scale(0.96);
-}
-
-/* Crossfade entre as duas fotos do cabeçalho: ambas ocupam o mesmo espaço (position absolute),
-   então a troca de opacidade não move nem redimensiona nada — sem risco de "bug" no zoom. */
-.avatar-photo {
-    opacity: 0;
-}
-
-.avatar-photo.active {
-    opacity: 1;
 }
 
 .story-ring-svg {
@@ -481,8 +471,7 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
     </div>
 
     <div class="avatar-ring" id="avatarRing">
-        <img src="imagem.jpg" class="avatar avatar-photo active" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
-        <img src="imagem2.jpg" class="avatar avatar-photo" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <img src="elianeperfil.jpg" class="avatar" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
         <svg class="story-ring-svg" viewBox="0 0 126 126" xmlns="http://www.w3.org/2000/svg">
             <defs>
     <mask id="storyRingReveal" maskUnits="userSpaceOnUse"
@@ -551,7 +540,7 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
     <div class="lightbox-inner" id="lightboxInner">
         <div class="lightbox-shimmer"></div>
         <div class="lightbox-ring"></div>
-        <img src="imagem.jpg" class="avatar-lightbox-img" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <img src="elianeperfil.jpg" class="avatar-lightbox-img" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
     </div>
 </div>
 
@@ -560,20 +549,6 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
-
-// ── Crossfade das fotos do cabeçalho (troca a cada 3s) ──
-(function() {
-    var photos = document.querySelectorAll('.avatar-photo');
-    if (photos.length < 2) return;
-
-    var current = 0;
-
-    setInterval(function() {
-        photos[current].classList.remove('active');
-        current = (current + 1) % photos.length;
-        photos[current].classList.add('active');
-    }, 3000);
-})();
 
 // ── Tema ──
 (function() {
