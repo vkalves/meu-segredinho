@@ -340,8 +340,8 @@ body {
     background: #e9fbf0; padding: 4px 10px; border-radius: 20px;
     display: inline-flex; align-items: center; gap: 6px; border: 1px solid #a8dfb8;
     transform-origin: center;
-    will-change: transform, box-shadow;
-    animation: online-status-pulse 1.85s ease-in-out infinite;
+    will-change: opacity;
+    animation: online-status-pulse 2.6s ease-in-out infinite;
     transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -355,7 +355,7 @@ body.dark-mode .online-status {
 .online-status .dot {
     width: 8px; height: 8px; flex-shrink: 0;
     background-color: #28a745; border-radius: 50%;
-    animation: pulse-green 1.35s ease-out infinite;
+    animation: pulse-green 2s ease-out infinite;
 }
 
 body.dark-mode .online-status .dot {
@@ -364,22 +364,18 @@ body.dark-mode .online-status .dot {
 
 @keyframes online-status-pulse {
     0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 2px 7px rgba(var(--online-glow), 0.14), 0 0 0 0 rgba(var(--online-glow), 0.22);
+        opacity: 1;
+        box-shadow: 0 2px 6px rgba(var(--online-glow), 0.12);
     }
-    45% {
-        transform: scale(1.075);
-        box-shadow: 0 5px 16px rgba(var(--online-glow), 0.30), 0 0 0 5px rgba(var(--online-glow), 0.14);
-    }
-    78% {
-        transform: scale(1.015);
-        box-shadow: 0 3px 10px rgba(var(--online-glow), 0.18), 0 0 0 11px rgba(var(--online-glow), 0);
+    50% {
+        opacity: 0.82;
+        box-shadow: 0 2px 6px rgba(var(--online-glow), 0.12);
     }
 }
 
 @keyframes pulse-green {
-    0%   { box-shadow: 0 0 0 0 rgba(var(--online-glow), 0.60); }
-    75%  { box-shadow: 0 0 0 8px rgba(var(--online-glow), 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(var(--online-glow), 0.35); }
+    75%  { box-shadow: 0 0 0 4px rgba(var(--online-glow), 0); }
     100% { box-shadow: 0 0 0 0 rgba(var(--online-glow), 0); }
 }
 
@@ -699,6 +695,27 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
         }
 
         requestAnimationFrame(step);
+    });
+
+    // ── Reseta a tela ao voltar do Telegram (ex: botão "voltar") ──
+    // O navegador pode restaurar a página exatamente como estava (bfcache),
+    // ou seja, ainda travada na tela "abrindo telegram...". Isso garante
+    // que sempre volte para o início.
+    function resetRedirectUI() {
+        redirecting = false;
+        fill.style.width = '0%';
+        screen.classList.remove('open');
+        card.classList.remove('card-hidden');
+    }
+
+    window.addEventListener('pageshow', function() {
+        resetRedirectUI();
+    });
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            resetRedirectUI();
+        }
     });
 })();
 
