@@ -428,6 +428,32 @@ body.dark-mode .online-status .dot {
 
 .btn-telegram:hover { transform: scale(1.02); }
 
+.btn-telegram.btn-loading {
+    animation: none;
+    pointer-events: none;
+    opacity: 0.92;
+}
+
+.btn-telegram.btn-loading:hover { transform: none; }
+
+.btn-spinner {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255,255,255,0.4);
+    border-top-color: #ffffff;
+    animation: btn-spin 0.7s linear infinite;
+    flex-shrink: 0;
+    display: none;
+}
+
+.btn-telegram.btn-loading .btn-spinner { display: inline-block; }
+.btn-telegram.btn-loading .icon-svg,
+.btn-telegram.btn-loading .btn-label { display: none; }
+
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
+}
+
 .secure-badge {
     display: flex; align-items: center; justify-content: center; gap: 5px;
     margin-top: auto; padding-top: 24px; font-size: 12px; font-weight: 500; color: var(--secure-text);
@@ -537,7 +563,8 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
        rel="noopener noreferrer"
        target="_blank">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg>
-        Meu Telegram
+        <span class="btn-label">Meu Telegram</span>
+        <span class="btn-spinner" aria-hidden="true"></span>
     </a>
 
     <div class="secure-badge">
@@ -559,6 +586,35 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
 </div>
 
 <script>
+// ── Carregamento ao clicar no botão do Telegram ──
+(function() {
+    var btn = document.getElementById('telegramBtn');
+    if (!btn) return;
+
+    var LOADING_MS = 1500;
+    var loading = false;
+
+    btn.addEventListener('click', function(e) {
+        if (loading) {
+            e.preventDefault();
+            return;
+        }
+
+        e.preventDefault();
+        loading = true;
+        btn.classList.add('btn-loading');
+
+        var destination = btn.getAttribute('href');
+        var target = btn.getAttribute('target') || '_self';
+
+        setTimeout(function() {
+            window.open(destination, target);
+            btn.classList.remove('btn-loading');
+            loading = false;
+        }, LOADING_MS);
+    });
+})();
+
 // ── Bloqueia o menu de clique direito em todo o site ──
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
