@@ -680,6 +680,11 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
         var destination = btn.getAttribute('href');
         var target = btn.getAttribute('target') || '_self';
 
+        // Abre a janela/aba IMEDIATAMENTE, ainda dentro do clique do usuário
+        // (obrigatório em navegadores mobile, senão o pop-up é bloqueado).
+        // Ela começa em branco e só recebe o destino após a animação.
+        var newWin = (target === '_blank') ? window.open('', '_blank') : null;
+
         card.classList.add('card-hidden');
         screen.classList.add('open');
         fill.style.width = '0%';
@@ -694,7 +699,16 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
             if (progress < 1) {
                 requestAnimationFrame(step);
             } else {
-                window.open(destination, target);
+                if (target === '_blank') {
+                    if (newWin) {
+                        newWin.location.href = destination;
+                    } else {
+                        // Pop-up bloqueado mesmo assim: usa a aba atual como reserva.
+                        window.location.href = destination;
+                    }
+                } else {
+                    window.location.href = destination;
+                }
                 screen.classList.remove('open');
                 card.classList.remove('card-hidden');
                 redirecting = false;
