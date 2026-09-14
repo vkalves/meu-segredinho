@@ -82,7 +82,7 @@ body {
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     border: 2px solid #fff;
-    transition: transform 0.3s ease, opacity 0.6s ease;
+    transition: transform 0.3s ease, opacity 0.6s ease, filter 0.35s ease;
     /* Bloqueia o menu nativo de "salvar imagem" no toque longo */
     pointer-events: none;
     -webkit-touch-callout: none;
@@ -99,6 +99,46 @@ body {
 
 .avatar-ring:active .avatar {
     transform: translate(-50%, -50%) scale(0.96);
+}
+
+/* Segunda foto do avatar — entra por cima da primeira via crossfade */
+.avatar-secondary {
+    opacity: 0;
+}
+
+/* Desfoque da foto por trás da notificação */
+.avatar.avatar-blurred {
+    filter: blur(3px);
+}
+
+/* ── Notificação dentro do círculo ── */
+.avatar-hint {
+    width: 126px; height: 126px; border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 18px;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    z-index: 2;
+}
+
+.avatar-hint.show {
+    opacity: 1;
+}
+
+.avatar-hint span {
+    color: #ffffff;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.2px;
 }
 
 .story-ring-svg {
@@ -474,7 +514,11 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
     </div>
 
     <div class="avatar-ring" id="avatarRing">
-        <img src="elianeperfil.jpg" class="avatar" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <img src="elianeperfil.jpg" class="avatar" id="avatarImg1" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <img src="elianeperfil2.jpg" class="avatar avatar-secondary" id="avatarImg2" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <div class="avatar-hint" id="avatarHint">
+            <span>Clique aqui para expandir</span>
+        </div>
         <svg class="story-ring-svg" viewBox="0 0 136 136" xmlns="http://www.w3.org/2000/svg">
             <defs>
     <mask id="storyRingReveal" maskUnits="userSpaceOnUse"
@@ -736,6 +780,32 @@ document.addEventListener('contextmenu', function(e) {
             setOpacity(solid, 1);
         }
     });
+})();
+
+// ── Troca automática de foto + notificação de dica ──
+(function() {
+    var img1 = document.getElementById('avatarImg1');
+    var img2 = document.getElementById('avatarImg2');
+    var hint = document.getElementById('avatarHint');
+    if (!img1 || !img2 || !hint) return;
+
+    // 1) Após 2s, troca da primeira foto para a segunda (crossfade)
+    setTimeout(function() {
+        img1.style.opacity = 0;
+        img2.style.opacity = 1;
+
+        // 2) 1s após a troca, mostra a notificação com o fundo desfocado
+        setTimeout(function() {
+            img2.classList.add('avatar-blurred');
+            hint.classList.add('show');
+
+            // 3) Notificação fica visível por 2s e depois some (fade out)
+            setTimeout(function() {
+                hint.classList.remove('show');
+                img2.classList.remove('avatar-blurred');
+            }, 2000);
+        }, 1000);
+    }, 2000);
 })();
 
 // ── Lightbox ──
