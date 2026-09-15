@@ -590,7 +590,7 @@ body.verification-active .human-dialog {
 .verify-track { position:relative; height:60px; width:100%; border-radius:18px; background:rgba(42,171,238,.07); border:1px solid rgba(42,171,238,.15); }
 .verify-fill { position:absolute; inset:0 auto 0 0; width:0; border-radius:17px; background:rgba(42,171,238,.13); pointer-events:none; }
 .verify-label { position:absolute; inset:0 12px 0 60px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--subtitle-text); pointer-events:none; }
-.verify-thumb { position:absolute; top:5px; left:5px; width:48px; height:48px; display:grid; place-items:center; padding:0; border:0; border-radius:13px; background:linear-gradient(135deg,var(--privacy-grad-start),var(--privacy-grad-end)); color:white; box-shadow:0 3px 9px rgba(34,158,217,.22); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.verify-thumb { position:absolute; top:5px; left:5px; width:48px; height:48px; display:grid; place-items:center; padding:0; border:0 !important; border-radius:13px; background:linear-gradient(135deg,var(--privacy-grad-start),var(--privacy-grad-end)); color:white; box-shadow:none !important; outline:none !important; -webkit-appearance:none; appearance:none; -webkit-tap-highlight-color:transparent !important; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 .verify-thumb svg { display:block; width:23px; height:23px; overflow:visible; pointer-events:none; transform-box:fill-box; transform-origin:center; }
 .verify-track.dragging .verify-thumb { cursor:grabbing; }
 .human-dialog[open] .verify-track:not(.dragging):not(.done) .verify-thumb svg { animation:verify-right-pulse 1.25s ease-in-out infinite; }
@@ -609,6 +609,22 @@ body.verification-active .human-dialog {
     .human-dialog[open] .verify-track:not(.dragging):not(.done) .verify-thumb svg {
         animation: verify-right-pulse 1.25s ease-in-out infinite !important;
     }
+}
+
+
+/* Bloqueia seleção, toque longo e destaque nativo em todo o site */
+html, body, body * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+img, svg {
+    -webkit-user-drag: none !important;
+    user-drag: none !important;
 }
 
 </style>
@@ -815,11 +831,9 @@ body.verification-active .human-dialog {
         paint(e.key === 'Home' ? 0 : e.key === 'End' ? 100 : value + (e.key === 'ArrowRight' ? 10 : -10));
         if (value === 100) finish();
     });
-    thumb.addEventListener('blur', function() { if (!complete) reset(); });
+    // Tocar fora da caixa não fecha nem reinicia a verificação.
     dialog.addEventListener('click', function(e) {
-        if (e.target !== dialog) return;
-        const r = dialog.getBoundingClientRect();
-        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+        if (e.target === dialog) e.preventDefault();
     });
     dialog.addEventListener('close', function() {
         unlockVerificationPage();
@@ -827,9 +841,8 @@ body.verification-active .human-dialog {
         btn.focus();
     });
 
-    dialog.addEventListener('cancel', function() {
-        unlockVerificationPage();
-        reset();
+    dialog.addEventListener('cancel', function(e) {
+        e.preventDefault();
     });
 
     window.addEventListener('blur', reset);
@@ -848,9 +861,11 @@ body.verification-active .human-dialog {
     });
 })();
 
-// ── Bloqueia o menu de clique direito em todo o site ──
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
+// ── Bloqueia clique direito, seleção, arraste e toque longo em todo o site ──
+['contextmenu', 'selectstart', 'dragstart'].forEach(function(type) {
+    document.addEventListener(type, function(e) {
+        e.preventDefault();
+    }, { capture: true });
 });
 
 // ── Tema ──
