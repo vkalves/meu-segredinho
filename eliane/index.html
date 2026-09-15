@@ -1,22 +1,7 @@
-<script type="text/javascript">
-  //digite a url de redirect
-  var url_link_redirect_pc = "https://https://https://g1.globo.com//";
-
-  //function js
-  function isMobile() {
-   const regex = /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-   return regex.test(navigator.userAgent);
-  }
-
-  //validation js
-  if (isMobile()) { console.log("Mobile device detected"); } else {
-   window.location = url_link_redirect_pc;
-  }
- </script>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!-- Versão para análise: redirecionamento de PC desativado. -->
 <meta charset="UTF-8">
 <title>Eliane Fen | Exclusivo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -430,7 +415,7 @@ body.dark-mode .online-status .dot {
 
 .icon-svg { width: 23px; height: 23px; fill: #ffffff; flex-shrink: 0; }
 
-.btn-telegram {
+.btn-priva {
     background: linear-gradient(135deg, var(--privacy-grad-start), var(--privacy-grad-end));
     box-shadow: 0 5px 15px rgba(42,171,238,0.3);
     animation: btn-soft-pulse 2.5s ease-in-out infinite;
@@ -438,7 +423,7 @@ body.dark-mode .online-status .dot {
     margin-top: 8px;
 }
 
-.btn-telegram:hover { transform: scale(1.02); }
+.btn-priva:hover { transform: scale(1.02); }
 
 .secure-badge {
     display: flex; align-items: center; justify-content: center; gap: 5px;
@@ -460,7 +445,7 @@ body.dark-mode .online-status .dot {
     transition: background 0.3s ease, transform 0.2s ease;
 }
 
-/* ── Tela de carregamento ao abrir o Telegram ── */
+/* ── Tela de carregamento ao abrir o Priva ── */
 .card {
     transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease;
 }
@@ -561,6 +546,72 @@ body.dark-mode .online-status .dot {
 body.dark-mode .theme-toggle .icon-sun  { display: block; }
 body.dark-mode .theme-toggle .icon-moon { display: none; }
 
+
+/* Confirmação por gesto; não substitui CAPTCHA validado no servidor. */
+
+/* Enquanto a verificação estiver ativa:
+   - desfoca o conteúdo atrás do modal
+   - impede scroll/movimento da página */
+html.verification-active,
+body.verification-active {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+
+body.verification-active {
+    touch-action: none;
+}
+
+body.verification-active .card,
+body.verification-active .avatar-lightbox,
+body.verification-active .redirect-screen {
+    filter: blur(7px);
+    transform: scale(0.985);
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: filter .22s ease, transform .22s ease;
+}
+
+/* O próprio modal continua nítido e interativo */
+body.verification-active .human-dialog {
+    filter: none !important;
+    transform: none;
+    pointer-events: auto;
+    touch-action: auto;
+}
+
+.human-dialog { width:calc(100% - 36px); max-width:340px; max-height:calc(100dvh - 36px); padding:26px 22px 22px; overflow:auto; border:1px solid rgba(128,148,164,.15); border-radius:24px; background:var(--card-bg); color:var(--privacy-text); text-align:center; box-shadow:0 24px 80px rgba(12,32,48,.18); }
+.human-dialog::backdrop { background:rgba(15,27,38,.32); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+.human-dialog[open] { animation:verify-enter .22s ease-out; }
+.verify-icon { width:42px; height:42px; display:block; margin:0 auto 14px; color:var(--privacy-accent); }
+.human-dialog h2 { font-size:19px; line-height:1.3; font-weight:800; letter-spacing:-.5px; margin:0 0 9px; }
+.verify-description { font-size:12px; line-height:1.65; color:var(--subtitle-text); margin:0 0 21px; }
+.verify-track { position:relative; height:60px; width:100%; border-radius:18px; background:rgba(42,171,238,.07); border:1px solid rgba(42,171,238,.15); }
+.verify-fill { position:absolute; inset:0 auto 0 0; width:0; border-radius:17px; background:rgba(42,171,238,.13); pointer-events:none; }
+.verify-label { position:absolute; inset:0 12px 0 60px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--subtitle-text); pointer-events:none; }
+.verify-thumb { position:absolute; top:5px; left:5px; width:48px; height:48px; display:grid; place-items:center; padding:0; border:0; border-radius:13px; background:linear-gradient(135deg,var(--privacy-grad-start),var(--privacy-grad-end)); color:white; box-shadow:0 3px 9px rgba(34,158,217,.22); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.verify-thumb:focus-visible { outline:3px solid var(--privacy-accent); outline-offset:3px; }
+.verify-thumb svg { display:block; width:23px; height:23px; overflow:visible; pointer-events:none; transform-box:fill-box; transform-origin:center; }
+.verify-track.dragging .verify-thumb { cursor:grabbing; }
+.human-dialog[open] .verify-track:not(.dragging):not(.done) .verify-thumb svg { animation:verify-right-pulse 1.25s ease-in-out infinite; }
+.verify-track.done .verify-label { opacity:0 !important; }
+.verify-status { font-size:11px; color:var(--privacy-accent); line-height:1.5; min-height:17px; margin:13px 0 0; }
+@keyframes verify-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@keyframes verify-right-pulse {
+    0%, 100% { transform: translateX(0) scale(1); opacity: 1; }
+    40%      { transform: translateX(7px) scale(1.10); opacity: .72; }
+    65%      { transform: translateX(0) scale(1); opacity: 1; }
+}
+@media(prefers-reduced-motion:reduce) {
+    .human-dialog[open] { animation:none; }
+
+    /* Exceção: mantém o pulso da seta para a direita mesmo com redução de movimento. */
+    .human-dialog[open] .verify-track:not(.dragging):not(.done) .verify-thumb svg {
+        animation: verify-right-pulse 1.25s ease-in-out infinite !important;
+    }
+}
+
 </style>
 </head>
 
@@ -590,8 +641,8 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
     </div>
 
     <div class="avatar-ring" id="avatarRing">
-        <img src="elianeperfil.jpg" class="avatar" id="avatarImg1" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
-        <img src="elianeperfil2.jpg" class="avatar avatar-secondary" id="avatarImg2" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <img src="elianeperfil.jpg" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/vkalves/meu-segredinho/main/eliane/elianeperfil.jpg';" class="avatar" id="avatarImg1" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <img src="elianeperfil2.jpg" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/vkalves/meu-segredinho/main/eliane/elianeperfil2.jpg';" class="avatar avatar-secondary" id="avatarImg2" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
         <svg class="story-ring-svg" viewBox="0 0 136 136" xmlns="http://www.w3.org/2000/svg">
             <defs>
     <mask id="storyRingReveal" maskUnits="userSpaceOnUse"
@@ -631,18 +682,18 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
     </div>
 
     <div class="title">Vamos conversar?</div>
-    <div class="subtitle">Me envia uma mensagem lá no Telegram, te prometo que não sou robô</div>
+    <div class="subtitle">Me envia uma mensagem lá, te prometo que não sou um robô</div>
 
     <div class="online-status">
         <span class="dot"></span> online agora
     </div>
 
     <a href="https://t.me/elianefenn"
-       id="telegramBtn"
-       class="btn btn-telegram"
+       id="privaBtn"
+       class="btn btn-priva"
        rel="noopener noreferrer">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg>
-        Meu Telegram
+        Meu Priva
     </a>
 
     <div class="secure-badge">
@@ -659,79 +710,142 @@ body.dark-mode .theme-toggle .icon-moon { display: none; }
     <div class="lightbox-inner" id="lightboxInner">
         <div class="lightbox-shimmer"></div>
         <div class="lightbox-ring"></div>
-        <img src="elianeperfil2.jpg" class="avatar-lightbox-img" id="lightboxImg" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
+        <img src="elianeperfil2.jpg" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/vkalves/meu-segredinho/main/eliane/elianeperfil2.jpg';" class="avatar-lightbox-img" id="lightboxImg" alt="Eliane Fen" draggable="false" oncontextmenu="return false;">
     </div>
 </div>
 
+
+<dialog class="human-dialog" id="humanDialog" aria-labelledby="humanTitle" aria-describedby="humanDescription">
+  <svg class="verify-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect width="40" height="40" rx="13" fill="currentColor" opacity=".08"/><path d="M20 9l10 4v7c0 6-10 11-10 11S10 26 10 20v-7l10-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m15.5 20 3 3 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h2 id="humanTitle">Só mais um passo</h2>
+  <p class="verify-description" id="humanDescription">Arraste o botão azul até o final<br>para continuar.</p>
+  <div class="verify-track" id="verifyTrack">
+    <div class="verify-fill" id="verifyFill"></div>
+    <span class="verify-label" id="verifyLabel" aria-hidden="true">Deslize para a direita</span>
+    <div class="verify-thumb" id="verifyThumb" role="slider" tabindex="0" aria-label="Deslize para continuar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Arraste até o final ou use a seta para a direita" aria-orientation="horizontal">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path id="verifyGlyph" d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <p class="verify-status" id="verifyStatus" role="status" aria-live="polite"></p>
+</dialog>
+
 <!-- Tela de carregamento -->
 <div class="redirect-screen" id="redirectScreen">
-    <div class="redirect-text">abrindo telegram...</div>
+    <div class="redirect-text">abrindo priva...</div>
     <div class="redirect-progress-track">
         <div class="redirect-progress-fill" id="redirectProgressFill"></div>
     </div>
 </div>
 
 <script>
-// ── Barra de progresso ao clicar no botão do Telegram ──
+// Confirmação visual por gesto; não constitui proteção antirrobô no servidor.
 (function() {
-    var btn     = document.getElementById('telegramBtn');
-    var card    = document.querySelector('.card');
-    var screen  = document.getElementById('redirectScreen');
-    var fill    = document.getElementById('redirectProgressFill');
-    if (!btn || !card || !screen || !fill) return;
-
-    var DURATION_MS = 1500;
-    var redirecting = false;
-
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (redirecting) return;
-        redirecting = true;
-
-        var destination = btn.getAttribute('href');
-
-        card.classList.add('card-hidden');
-        screen.classList.add('open');
-        fill.style.width = '0%';
-
-        var start = null;
-
-        function step(ts) {
-            if (start === null) start = ts;
-            var progress = Math.min((ts - start) / DURATION_MS, 1);
-            fill.style.width = (progress * 100) + '%';
-
-            if (progress < 1) {
-                requestAnimationFrame(step);
-            } else {
-                // Redireciona na mesma aba — evita qualquer bloqueio de
-                // pop-up ou janela extra em navegadores mobile.
-                window.location.href = destination;
-            }
-        }
-
-        requestAnimationFrame(step);
-    });
-
-    // ── Reseta a tela ao voltar do Telegram (ex: botão "voltar") ──
-    // O navegador pode restaurar a página exatamente como estava (bfcache),
-    // ou seja, ainda travada na tela "abrindo telegram...". Isso garante
-    // que sempre volte para o início.
-    function resetRedirectUI() {
-        redirecting = false;
-        fill.style.width = '0%';
-        screen.classList.remove('open');
-        card.classList.remove('card-hidden');
+    const btn = document.getElementById('privaBtn');
+    const dialog = document.getElementById('humanDialog');
+    const track = document.getElementById('verifyTrack');
+    const thumb = document.getElementById('verifyThumb');
+    const fill = document.getElementById('verifyFill');
+    const label = document.getElementById('verifyLabel');
+    const status = document.getElementById('verifyStatus');
+    const glyph = document.getElementById('verifyGlyph');
+    let value = 0, pointer = null, startX = 0, startValue = 0, complete = false, timer = 0;
+    const distance = () => Math.max(1, track.clientWidth - thumb.offsetWidth - 10);
+    function paint(next) {
+        value = Math.max(0, Math.min(100, next));
+        const px = distance() * value / 100;
+        thumb.style.transform = 'translateX(' + px + 'px)';
+        fill.style.width = (value ? px + 53 : 0) + 'px';
+        label.style.opacity = String(1 - value / 100);
+        thumb.setAttribute('aria-valuenow', String(Math.round(value)));
+        thumb.setAttribute('aria-valuetext', Math.round(value) + '% concluído');
+    }
+    function reset() {
+        clearTimeout(timer); complete = false; pointer = null;
+        track.classList.remove('dragging', 'done');
+        thumb.removeAttribute('aria-disabled');
+        glyph.setAttribute('d', 'm9 5 7 7-7 7');
+        status.textContent = ''; paint(0);
+    }
+    function finish() {
+        if (complete || !dialog.open || document.hidden) return;
+        complete = true; pointer = null; paint(100);
+        track.classList.remove('dragging'); track.classList.add('done');
+        thumb.setAttribute('aria-disabled', 'true');
+        glyph.setAttribute('d', 'm5 12 4 4L19 6');
+        status.textContent = 'Pronto! Abrindo Priva…';
+        timer = setTimeout(function() {
+            if (dialog.open && !document.hidden) window.location.assign(btn.href);
+        }, 350);
+    }
+    function lockVerificationPage() {
+        document.documentElement.classList.add('verification-active');
+        document.body.classList.add('verification-active');
     }
 
-    window.addEventListener('pageshow', function() {
-        resetRedirectUI();
+    function unlockVerificationPage() {
+        document.documentElement.classList.remove('verification-active');
+        document.body.classList.remove('verification-active');
+    }
+
+    btn.addEventListener('click', function(e) {
+        e.preventDefault(); if (dialog.open) return;
+        lockVerificationPage();
+        dialog.showModal(); reset(); thumb.focus();
+    });
+    thumb.addEventListener('pointerdown', function(e) {
+        if (complete || pointer !== null || !e.isPrimary || e.button !== 0) return;
+        e.preventDefault(); thumb.focus();
+        pointer = e.pointerId; startX = e.clientX; startValue = value;
+        thumb.setPointerCapture(e.pointerId); track.classList.add('dragging');
+    });
+    thumb.addEventListener('pointermove', function(e) {
+        if (pointer !== e.pointerId || complete) return;
+        e.preventDefault(); paint(startValue + (e.clientX - startX) / distance() * 100);
+    });
+    thumb.addEventListener('pointerup', function(e) {
+        if (pointer !== e.pointerId) return;
+        if (value >= 98) finish(); else reset();
+    });
+    ['pointercancel', 'lostpointercapture'].forEach(function(type) {
+        thumb.addEventListener(type, function(e) { if (pointer === e.pointerId) reset(); });
+    });
+    thumb.addEventListener('keydown', function(e) {
+        if (complete || pointer !== null) return;
+        if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+        e.preventDefault();
+        paint(e.key === 'Home' ? 0 : e.key === 'End' ? 100 : value + (e.key === 'ArrowRight' ? 10 : -10));
+        if (value === 100) finish();
+    });
+    thumb.addEventListener('blur', function() { if (!complete) reset(); });
+    dialog.addEventListener('click', function(e) {
+        if (e.target !== dialog) return;
+        const r = dialog.getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+    });
+    dialog.addEventListener('close', function() {
+        unlockVerificationPage();
+        reset();
+        btn.focus();
     });
 
-    document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible') {
-            resetRedirectUI();
-        }
+    dialog.addEventListener('cancel', function() {
+        unlockVerificationPage();
+        reset();
+    });
+
+    window.addEventListener('blur', reset);
+    window.addEventListener('resize', reset);
+    document.addEventListener('visibilitychange', function() { if (document.hidden) reset(); });
+
+    window.addEventListener('pagehide', function() {
+        unlockVerificationPage();
+        reset();
+    });
+
+    window.addEventListener('pageshow', function() {
+        unlockVerificationPage();
+        reset();
+        if (dialog.open) dialog.close();
     });
 })();
 
