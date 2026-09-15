@@ -591,7 +591,6 @@ body.verification-active .human-dialog {
 .verify-fill { position:absolute; inset:0 auto 0 0; width:0; border-radius:17px; background:rgba(42,171,238,.13); pointer-events:none; }
 .verify-label { position:absolute; inset:0 12px 0 60px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--subtitle-text); pointer-events:none; }
 .verify-thumb { position:absolute; top:5px; left:5px; width:48px; height:48px; display:grid; place-items:center; padding:0; border:0; border-radius:13px; background:linear-gradient(135deg,var(--privacy-grad-start),var(--privacy-grad-end)); color:white; box-shadow:0 3px 9px rgba(34,158,217,.22); cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
-.verify-thumb:focus-visible { outline:3px solid var(--privacy-accent); outline-offset:3px; }
 .verify-thumb svg { display:block; width:23px; height:23px; overflow:visible; pointer-events:none; transform-box:fill-box; transform-origin:center; }
 .verify-track.dragging .verify-thumb { cursor:grabbing; }
 .human-dialog[open] .verify-track:not(.dragging):not(.done) .verify-thumb svg { animation:verify-right-pulse 1.25s ease-in-out infinite; }
@@ -682,7 +681,7 @@ body.verification-active .human-dialog {
     </div>
 
     <div class="title">Vamos conversar?</div>
-    <div class="subtitle">Me envia uma mensagem lá, te prometo que não sou um robô</div>
+    <div class="subtitle">Me envia uma mensagem lá no Priva, te prometo que não sou robô</div>
 
     <div class="online-status">
         <span class="dot"></span> online agora
