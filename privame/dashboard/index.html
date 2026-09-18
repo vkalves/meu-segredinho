@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080706" />
+    <meta
+      name="description"
+      content="Dashboard Privame para acompanhamento de faturamento, metas e desempenho em OnlyFans, Privacy e Telegram."
+    />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <link rel="stylesheet" href="../assets/styles.css" />
+    <title>Dashboard — Privame</title>
+  </head>
+  <body class="dashboard-page">
+    <button class="sidebar-overlay" id="sidebar-overlay" aria-label="Fechar menu"></button>
+
+    <div class="dashboard-layout">
+      <aside class="sidebar" id="sidebar" aria-label="Menu do dashboard">
+        <a class="sidebar-brand" href="../" aria-label="Voltar ao site Privame">
+          <img src="../assets/privame-logo.svg" alt="Privame" />
+          <span class="sidebar-badge">OPS</span>
+        </a>
+
+        <p class="sidebar-label">Painel</p>
+        <nav class="sidebar-nav">
+          <button class="nav-button active" type="button" data-view="overview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Visão geral
+          </button>
+          <button class="nav-button" type="button" data-view="platforms">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg>
+            Plataformas
+          </button>
+          <button class="nav-button" type="button" data-view="creators">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Criadoras
+          </button>
+          <button class="nav-button" type="button" data-view="reports">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/></svg>
+            Relatórios
+          </button>
+          <button class="nav-button" type="button" data-view="goals">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+            Metas
+          </button>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+        <p class="sidebar-label">Conta</p>
+        <a class="nav-button" href="../">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Ver site
+        </a>
+        <div class="profile-card">
+          <span class="profile-avatar">PV</span>
+          <div><strong>Privame</strong><span>Gestão da agência</span></div>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <header class="dashboard-topbar">
+          <div class="dashboard-title">
+            <h1 id="view-title">Visão geral</h1>
+            <p id="view-subtitle">Acompanhe o desempenho consolidado da operação.</p>
+          </div>
+          <div class="topbar-actions">
+            <span class="demo-pill">Dados demonstrativos</span>
+            <label>
+              <span class="sr-only">Período</span>
+              <select class="period-select" id="period-select">
+                <option value="7d">Últimos 7 dias</option>
+                <option value="30d" selected>Últimos 30 dias</option>
+                <option value="90d">Últimos 90 dias</option>
+                <option value="year">Este ano</option>
+              </select>
+            </label>
+            <button class="button small" id="refresh-button" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"/></svg>
+              <span>Atualizar</span>
+            </button>
+            <button class="mobile-menu" id="mobile-menu" type="button" aria-label="Abrir menu" aria-expanded="false">
+              <svg viewBox="0 0 24 24" width="20" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="filters-row">
+          <div class="platform-filters" aria-label="Filtrar por plataforma">
+            <button class="filter-chip active" type="button" data-platform="all">Todas</button>
+            <button class="filter-chip" type="button" data-platform="onlyfans">OnlyFans</button>
+            <button class="filter-chip" type="button" data-platform="privacy">Privacy</button>
+            <button class="filter-chip" type="button" data-platform="telegram">Telegram</button>
+          </div>
+          <span class="last-update" id="last-update">Atualizado hoje, 21:42</span>
+        </div>
+
+        <section class="view-section" data-views="overview">
+          <div class="kpi-grid">
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Faturamento bruto</span><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg></span></div>
+              <p class="kpi-value" id="gross-revenue">R$ 184.760</p>
+              <span class="trend" id="gross-trend">↗ 18,4% <span>vs. período anterior</span></span>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Receita líquida</span><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v18h18M7 16l4-5 3 3 5-7"/></svg></span></div>
+              <p class="kpi-value" id="net-revenue">R$ 142.540</p>
+              <span class="trend" id="net-trend">↗ 16,9% <span>após taxas</span></span>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Assinaturas</span><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 8v6M23 11h-6"/></svg></span></div>
+              <p class="kpi-value" id="subscriptions">4.862</p>
+              <span class="trend" id="subscriptions-trend">↗ 12,6% <span>novas e renovadas</span></span>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-head"><span>Ticket médio</span><span class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg></span></div>
+              <p class="kpi-value" id="average-ticket">R$ 38,01</p>
+              <span class="trend" id="ticket-trend">↗ 5,2% <span>por assinatura</span></span>
+            </article>
+          </div>
+        </section>
+
+        <section class="view-section" data-views="overview platforms">
+          <div class="dashboard-grid">
+            <article class="dash-card revenue-chart-wrap">
+              <div class="card-head">
+                <div><h2>Evolução do faturamento</h2><p id="chart-caption">Receita diária consolidada</p></div>
+                <button class="card-menu" type="button" aria-label="Opções do gráfico">•••</button>
+              </div>
+              <svg class="revenue-chart" viewBox="0 0 720 270" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução do faturamento">
+                <defs>
+                  <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ed887c" stop-opacity="0.3" />
+                    <stop offset="1" stop-color="#ed887c" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <path class="grid" d="M20 30H700M20 95H700M20 160H700M20 225H700" />
+                <path class="area" id="revenue-area" d="" />
+                <path class="line" id="revenue-line" d="" />
+                <g id="revenue-points"></g>
+              </svg>
+              <div class="axis-labels" id="axis-labels"></div>
+            </article>
+
+            <article class="dash-card">
+              <div class="card-head"><div><h2>Receita por canal</h2><p>Participação no total</p></div></div>
+              <div class="donut-area">
+                <div class="donut" id="platform-donut"><div class="donut-center"><strong id="donut-total">R$ 184,8k</strong><span>Total bruto</span></div></div>
+              </div>
+              <div class="legend">
+                <div class="legend-item"><span class="legend-dot" style="background:#ed887c"></span><span>OnlyFans</span><strong id="share-onlyfans">48%</strong></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#cba58f"></span><span>Privacy</span><strong id="share-privacy">35%</strong></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#665047"></span><span>Telegram</span><strong id="share-telegram">17%</strong></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="view-heading" data-section-label="platforms">
+            <h2>Desempenho por plataforma</h2>
+            <p>Faturamento, crescimento e avanço da meta mensal.</p>
+          </div>
+          <div class="platform-card-grid">
+            <article class="platform-card" data-platform-card="onlyfans">
+              <div class="platform-card-head"><div class="platform-name"><span class="platform-symbol of">OF</span>OnlyFans</div><span class="trend">↗ 21,2%</span></div>
+              <p class="platform-revenue" data-platform-value="onlyfans">R$ 88.685</p>
+              <span class="platform-meta">2.280 assinaturas ativas</span>
+              <div class="progress-track"><div class="progress-bar" style="width:78%"></div></div>
+              <div class="progress-caption"><span>Meta R$ 114 mil</span><strong>78%</strong></div>
+            </article>
+            <article class="platform-card" data-platform-card="privacy">
+              <div class="platform-card-head"><div class="platform-name"><span class="platform-symbol pr">PR</span>Privacy</div><span class="trend">↗ 14,8%</span></div>
+              <p class="platform-revenue" data-platform-value="privacy">R$ 64.666</p>
+              <span class="platform-meta">1.694 assinaturas ativas</span>
+              <div class="progress-track"><div class="progress-bar" style="width:69%"></div></div>
+              <div class="progress-caption"><span>Meta R$ 94 mil</span><strong>69%</strong></div>
+            </article>
+            <article class="platform-card" data-platform-card="telegram">
+              <div class="platform-card-head"><div class="platform-name"><span class="platform-symbol tg">TG</span>Telegram</div><span class="trend">↗ 17,1%</span></div>
+              <p class="platform-revenue" data-platform-value="telegram">R$ 31.409</p>
+              <span class="platform-meta">888 compradores no período</span>
+              <div class="progress-track"><div class="progress-bar" style="width:60%"></div></div>
+              <div class="progress-caption"><span>Meta R$ 52 mil</span><strong>60%</strong></div>
+            </article>
+          </div>
+        </section>
+
+        <div class="lower-grid">
+          <section class="view-section dash-card" data-views="overview creators">
+            <div class="card-head"><div><h2>Desempenho das criadoras</h2><p>Ranking por receita no período</p></div></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>#</th><th>Criadora</th><th>Receita</th><th>Crescimento</th></tr></thead>
+                <tbody id="creators-table">
+                  <tr><td class="rank">01</td><td><div class="creator-cell"><span class="creator-avatar">LA</span><strong>Luna A.</strong></div></td><td>R$ 46.820</td><td><span class="trend">↗ 24,6%</span></td></tr>
+                  <tr><td class="rank">02</td><td><div class="creator-cell"><span class="creator-avatar">MR</span><strong>Maya R.</strong></div></td><td>R$ 39.540</td><td><span class="trend">↗ 18,1%</span></td></tr>
+                  <tr><td class="rank">03</td><td><div class="creator-cell"><span class="creator-avatar">NV</span><strong>Nina V.</strong></div></td><td>R$ 32.960</td><td><span class="trend">↗ 15,7%</span></td></tr>
+                  <tr><td class="rank">04</td><td><div class="creator-cell"><span class="creator-avatar">BM</span><strong>Bella M.</strong></div></td><td>R$ 28.740</td><td><span class="trend">↗ 11,3%</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="view-section dash-card" data-views="overview goals">
+            <div class="card-head"><div><h2>Meta mensal</h2><p>Progresso consolidado da agência</p></div></div>
+            <p class="goal-total" id="goal-current">R$ 184.760 <span>de <strong id="goal-target-label">R$ 260.000</strong></span></p>
+            <div class="goal-ring-wrap">
+              <div class="goal-ring" id="goal-ring"><strong id="goal-percent">71%</strong></div>
+              <div class="goal-copy">
+                <p>Faltam <strong id="goal-remaining">R$ 75.240</strong> para atingir a meta.</p>
+                <p>Ritmo projetado: <strong>R$ 267 mil</strong>.</p>
+              </div>
+            </div>
+            <div class="goal-input-row">
+              <label class="sr-only" for="goal-input">Nova meta mensal</label>
+              <input class="goal-input" id="goal-input" type="number" min="50000" step="1000" value="260000" />
+              <button class="button small" id="save-goal" type="button">Salvar meta</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="view-section" data-views="reports" hidden>
+          <div class="view-heading"><h2>Relatório de movimentações</h2><p>Resumo demonstrativo das entradas registradas no período.</p></div>
+          <article class="dash-card">
+            <div class="card-head">
+              <div><h2>Receitas recentes</h2><p>Dados consolidados por origem</p></div>
+              <button class="button secondary small" id="export-report" type="button">Exportar CSV</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Data</th><th>Plataforma</th><th>Origem</th><th>Bruto</th><th>Líquido</th><th>Status</th></tr></thead>
+                <tbody id="transactions-table">
+                  <tr data-row-platform="onlyfans"><td>18/09/2026</td><td><strong>OnlyFans</strong></td><td>Assinaturas</td><td>R$ 8.640</td><td>R$ 6.912</td><td><span class="status-pill">Confirmado</span></td></tr>
+                  <tr data-row-platform="privacy"><td>18/09/2026</td><td><strong>Privacy</strong></td><td>Conteúdo avulso</td><td>R$ 5.420</td><td>R$ 4.336</td><td><span class="status-pill">Confirmado</span></td></tr>
+                  <tr data-row-platform="telegram"><td>17/09/2026</td><td><strong>Telegram</strong></td><td>Oferta direta</td><td>R$ 3.780</td><td>R$ 3.629</td><td><span class="status-pill">Confirmado</span></td></tr>
+                  <tr data-row-platform="onlyfans"><td>17/09/2026</td><td><strong>OnlyFans</strong></td><td>Mensagens pagas</td><td>R$ 4.910</td><td>R$ 3.928</td><td><span class="status-pill">Confirmado</span></td></tr>
+                  <tr data-row-platform="privacy"><td>16/09/2026</td><td><strong>Privacy</strong></td><td>Assinaturas</td><td>R$ 4.180</td><td>R$ 3.344</td><td><span class="status-pill">Confirmado</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast-icon">✓</span><span id="toast-message">Dados atualizados.</span>
+    </div>
+
+    <script src="../assets/dashboard.js"></script>
+  </body>
+</html>
