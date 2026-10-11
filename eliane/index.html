@@ -1,77 +1,14 @@
-<!-- Troca automática das fotos a cada 2 segundos -->
-<style>
-.avatar-overlay {
-    opacity: 0;
-    transition: opacity 480ms ease-in-out;
-}
+<script type="text/javascript">
+  var url_link_redirect_pc = "https://https://https://g1.globo.com//";
 
-.avatar-overlay.is-visible {
-    opacity: 1;
-}
-</style>
+  function isMobile() {
+    const regex = /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    return regex.test(navigator.userAgent);
+  }
 
-<script>
-(function() {
-    const fotos = [
-        "elianeperfil.jpg",
-        "elianeperfil2.jpg",
-        "elianeperfil3.jpg"
-    ];
-
-    const avatar = document.getElementById("avatarImg");
-    const lightbox = document.getElementById("lightboxImg");
-
-    if (!avatar) return;
-
-    const overlay = avatar.cloneNode(false);
-    overlay.id = "avatarOverlay";
-    overlay.classList.add("avatar-overlay");
-    overlay.setAttribute("aria-hidden", "true");
-    overlay.alt = "";
-
-    avatar.after(overlay);
-
-    const imagens = fotos.map(src => {
-        const img = new Image();
-        img.src = src;
-        return img;
-    });
-
-    let indice = 0;
-    let trocando = false;
-
-    function trocarFoto() {
-        if (trocando) return;
-
-        const proximo = (indice + 1) % fotos.length;
-
-        if (!imagens[proximo].complete ||
-            !imagens[proximo].naturalWidth) return;
-
-        trocando = true;
-
-        overlay.src = fotos[proximo];
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                overlay.classList.add("is-visible");
-            });
-        });
-
-        setTimeout(() => {
-            avatar.src = fotos[proximo];
-
-            if (lightbox) {
-                lightbox.src = fotos[proximo];
-            }
-
-            overlay.classList.remove("is-visible");
-
-            indice = proximo;
-            trocando = false;
-        }, 520);
-    }
-
-    setInterval(trocarFoto, 2000);
-})();
+  if (isMobile()) {
+    console.log("Mobile device detected");
+  } else {
+    window.location = url_link_redirect_pc;
+  }
 </script>
