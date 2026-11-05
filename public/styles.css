@@ -23,9 +23,6 @@ a { color: inherit; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid rgba(81, 114, 99, .38); outline-offset: 2px; }
 ::selection { background: #e8f0b5; color: #24382f; }
 
-.app-loading { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; color: var(--muted); font-size: 14px; }
-.loader { width: 24px; height: 24px; border: 2px solid #dfe5dc; border-top-color: #527766; border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: var(--forest); color: var(--leaf); font: 800 20px/1 Manrope, sans-serif; }

@@ -545,13 +545,16 @@ async function renderRoute() {
   const pathname = decodeURIComponent(window.location.pathname.replace(/\/$/, '') || '/');
   const route = pathname === '/' ? '/' : pathname;
   if (route === '/auth/callback') return finishAuthCallback();
+  if (/^\/api(?:\/|$)/.test(route) || /^\/go(?:\/|$)/.test(route)) return;
+  if (/^\/[a-z0-9-]{1,30}$/i.test(route) && !['/login', '/register', '/dashboard', '/create'].includes(route.toLowerCase())) {
+    return renderPublicSlug(route.slice(1).toLowerCase());
+  }
   try {
     const session = await api('/api/session');
     state.user = session.user;
     if (session.baseUrl) state.baseUrl = session.baseUrl;
   } catch { state.user = null; }
 
-  if (/^\/api(?:\/|$)/.test(route) || /^\/go(?:\/|$)/.test(route)) return;
   if (route === '/login' || route === '/register' || route === '/') {
     if (state.user) {
       go('/dashboard', true);
@@ -587,7 +590,6 @@ async function renderRoute() {
     } catch (error) { showToast(error.message); go('/dashboard', true); }
     return;
   }
-  if (/^\/[a-z0-9-]{1,30}$/i.test(route)) return renderPublicSlug(route.slice(1).toLowerCase());
   notFound();
 }
 
