@@ -385,34 +385,61 @@ function colorInput(name, label, value) {
   return `<label class="color-field"><span>${label}</span><input type="color" name="${name}" value="${cleanColor(value, DEFAULTS[name])}" aria-label="${label}"></label>`;
 }
 
-function countryDestinationRowMarkup(countryCode = '', destinationUrl = '') {
-  const options = COUNTRY_OPTIONS.map(({ code, name }) =>
-    `<option value="${code}" ${code === countryCode ? 'selected' : ''}>${escapeHtml(name)}</option>`
-  ).join('');
-  return `<div class="country-destination-row">
-    <select class="country-destination-country" aria-label="País ou região do destino">
-      <option value="" ${countryCode ? '' : 'selected'}>Selecione uma opção</option>${options}
-    </select>
-    <input class="country-destination-url" type="url" maxlength="2048" value="${escapeHtml(destinationUrl)}" placeholder="https://destino-do-pais.com" aria-label="Endereço para a opção selecionada">
-    <button class="country-destination-remove" type="button" aria-label="Remover destino do país" title="Remover destino">×</button>
-  </div>`;
+function countryVariantField(group, field, label, value, options = {}) {
+  const hint = options.hint || 'Deixe em branco para usar o valor padrão.';
+  return editorField(label, `variant-${group}-${field}`, value || '', {
+    ...options,
+    hint,
+  });
+}
+
+function countryVariantColorField(group, field, label, value) {
+  const name = `variant-${group}-${field}`;
+  const id = `field-${name}`;
+  return `<div class="form-field"><label for="${id}">${label}</label><input id="${id}" name="${name}" type="text" value="${escapeHtml(value || '')}" maxlength="7" placeholder="Usar cor padrão"><span class="field-hint">Informe uma cor hexadecimal ou deixe em branco para usar a cor padrão.</span></div>`;
+}
+
+function countryVariantBooleanField(group, field, label, value) {
+  const name = `variant-${group}-${field}`;
+  const id = `field-${name}`;
+  return `<div class="form-field"><label for="${id}">${label}</label><select id="${id}" name="${name}" class="country-variant-select"><option value="" ${value === undefined ? 'selected' : ''}>Usar padrão</option><option value="true" ${value === true ? 'selected' : ''}>Mostrar</option><option value="false" ${value === false ? 'selected' : ''}>Ocultar</option></select></div>`;
+}
+
+function countryVariantMarkup(option, page) {
+  const { code, name } = option;
+  const variant = page.countryVariants?.[code] || {};
+  const destinationUrl = page.countryDestinations?.[code] || '';
+  return `<details class="country-variant-group">
+    <summary><span>${escapeHtml(name)}</span><small>Editar versão desta região</small></summary>
+    <div class="country-variant-fields">
+      <p class="field-hint country-variant-note">Campos vazios usam as informações padrão. A URL do botão pode ser definida só para esta região.</p>
+      ${countryVariantField(code, 'destinationUrl', 'Endereço do botão', destinationUrl, { type: 'url', placeholder: 'Usar endereço padrão' })}
+      ${countryVariantField(code, 'profileName', 'Nome no perfil', variant.profileName, { max: 50 })}
+      ${countryVariantField(code, 'avatarUrl', 'Endereço da foto de perfil', variant.avatarUrl, { type: 'url', max: 2048, placeholder: 'https://...' })}
+      ${countryVariantField(code, 'title', 'Título', variant.title, { max: 70 })}
+      ${countryVariantField(code, 'subtitle', 'Subtítulo', variant.subtitle, { type: 'textarea', max: 180 })}
+      ${countryVariantField(code, 'buttonLabel', 'Texto do botão', variant.buttonLabel, { max: 36 })}
+      ${countryVariantField(code, 'onlineLabel', 'Texto do status online', variant.onlineLabel, { max: 32 })}
+      ${countryVariantField(code, 'secureLabel', 'Texto de segurança', variant.secureLabel, { max: 48 })}
+      <div class="country-variant-color-grid">
+        ${countryVariantColorField(code, 'primaryColor', 'Cor principal', variant.primaryColor)}
+        ${countryVariantColorField(code, 'secondaryColor', 'Cor do gradiente', variant.secondaryColor)}
+        ${countryVariantColorField(code, 'backgroundColor', 'Fundo da página', variant.backgroundColor)}
+        ${countryVariantColorField(code, 'cardColor', 'Fundo do cartão', variant.cardColor)}
+        ${countryVariantColorField(code, 'textColor', 'Texto do título', variant.textColor)}
+      </div>
+      ${countryVariantBooleanField(code, 'verified', 'Mostrar selo verificado', variant.verified)}
+      ${countryVariantBooleanField(code, 'showOnline', 'Mostrar status online', variant.showOnline)}
+    </div>
+  </details>`;
 }
 
 function countryDestinationsMarkup(page) {
-  const destinations = page.countryDestinations && typeof page.countryDestinations === 'object'
-    ? page.countryDestinations
-    : {};
-  const rows = Object.entries(destinations)
-    .filter(([code, url]) => COUNTRY_OPTIONS.some((option) => option.code === code) && typeof url === 'string')
-    .map(([code, url]) => countryDestinationRowMarkup(code, url))
-    .join('');
   return `<div class="country-destinations">
-    <div class="country-destinations-heading"><strong>Personalizar por país ou região</strong><span>Brasil, Europa, Estados Unidos e GBP têm destinos próprios. As demais localidades usam o endereço padrão.</span></div>
-    <div class="country-destinations-list" id="countryDestinationsList">${rows}</div>
-    <button class="btn-secondary country-destination-add" id="addCountryDestination" type="button">+ Adicionar destino</button>
+    <div class="country-destinations-heading"><strong>Personalizar a página por país ou região</strong><span>Escolha uma região para editar seu conteúdo, aparência e endereço do botão. Campos em branco herdam o padrão.</span></div>
+    <div class="country-destinations-list">${COUNTRY_OPTIONS.map((option) => countryVariantMarkup(option, page)).join('')}</div>
   </div>`;
 }
-
 function editorFormMarkup(page, isNew) {
   const profileName = page.profileName || state.user.name;
   const initialsLabel = page.avatarUrl ? '' : escapeHtml(initials(profileName));
@@ -448,77 +475,74 @@ function editorFormMarkup(page, isNew) {
         <div class="editor-actions"><div class="editor-feedback" id="editorFeedback" aria-live="polite"></div><div class="editor-actions-right">${!isNew ? '<button class="btn-danger" type="button" data-delete>Excluir</button>' : ''}<button class="btn-primary" type="submit" id="savePage">${isNew ? 'Criar minha página' : 'Salvar alterações'} <span class="arrow" aria-hidden="true">→</span></button></div></div>
         <div class="form-message" role="alert"></div>
       </form>
-      <aside class="preview-panel" aria-label="Prévia da página"><div class="preview-head"><strong>Prévia ao vivo</strong><span>Como vai aparecer no celular</span></div><div class="preview-stage"><div class="preview-device" id="previewDevice"></div></div></aside>
+      <aside class="preview-panel" aria-label="Prévia da página"><div class="preview-head"><strong>Prévia ao vivo</strong><label class="preview-region-picker">Ver versão <select id="previewRegion"><option value="">Padrão</option>${COUNTRY_OPTIONS.map(({ code, name }) => `<option value="${code}">${escapeHtml(name)}</option>`).join('')}</select></label></div><div class="preview-stage"><div class="preview-device" id="previewDevice"></div></div></aside>
     </div>
   </div>`;
 }
 
-function refreshCountryDestinationOptions(form) {
-  const selects = Array.from(form.querySelectorAll('.country-destination-country'));
-  for (const select of selects) {
-    const selectedElsewhere = new Set(selects.filter((other) => other !== select).map((other) => other.value).filter(Boolean));
-    for (const option of select.options) {
-      option.disabled = Boolean(option.value && selectedElsewhere.has(option.value));
-    }
-  }
+function pageForCountryVariant(page, group) {
+  if (!group) return page;
+  return {
+    ...page,
+    ...(page.countryVariants?.[group] || {}),
+    destinationUrl: page.countryDestinations?.[group] || page.destinationUrl,
+  };
 }
+
 
 function collectPage(form, previous) {
   const data = Object.fromEntries(new FormData(form).entries());
+  const countryDestinations = {};
+  const countryVariants = {};
+  const variantTextFields = ['profileName', 'avatarUrl', 'title', 'subtitle', 'buttonLabel', 'onlineLabel', 'secureLabel'];
+  const variantColorFields = ['primaryColor', 'secondaryColor', 'backgroundColor', 'cardColor', 'textColor'];
+  for (const { code } of COUNTRY_OPTIONS) {
+    const variant = {};
+    const destinationUrl = String(data[`variant-${code}-destinationUrl`] || '').trim();
+    if (destinationUrl) countryDestinations[code] = destinationUrl;
+    for (const field of variantTextFields) {
+      const value = String(data[`variant-${code}-${field}`] || '').trim();
+      if (value) variant[field] = value;
+    }
+    for (const field of variantColorFields) {
+      const value = String(data[`variant-${code}-${field}`] || '').trim();
+      if (value) variant[field] = value;
+    }
+    for (const field of ['verified', 'showOnline']) {
+      const value = data[`variant-${code}-${field}`];
+      if (value === 'true' || value === 'false') variant[field] = value === 'true';
+    }
+    if (Object.keys(variant).length) countryVariants[code] = variant;
+  }
   return {
     ...previous,
     slug: data.slug.trim(), profileName: data.profileName.trim(), title: data.title.trim(),
     subtitle: data.subtitle.trim(), destinationUrl: data.destinationUrl.trim(),
     buttonLabel: data.buttonLabel.trim(), avatarUrl: data.avatarUrl.trim(),
-    countryDestinations: Array.from(form.querySelectorAll('.country-destination-row')).reduce((destinations, row) => {
-      const countryCode = row.querySelector('.country-destination-country').value.trim().toUpperCase();
-      const destinationUrl = row.querySelector('.country-destination-url').value.trim();
-      if (countryCode && destinationUrl) destinations[countryCode] = destinationUrl;
-      return destinations;
-    }, {}),
+    countryDestinations, countryVariants,
     onlineLabel: data.onlineLabel.trim(), secureLabel: data.secureLabel.trim(),
     verified: form.elements.verified.checked, showOnline: form.elements.showOnline.checked,
     primaryColor: data.primaryColor, secondaryColor: data.secondaryColor,
     backgroundColor: data.backgroundColor, cardColor: data.cardColor, textColor: data.textColor,
   };
 }
-
 function bindEditor(page, isNew) {
   const form = document.getElementById('editorForm');
   const preview = document.getElementById('previewDevice');
+  const previewRegion = document.getElementById('previewRegion');
   let draft = { ...page };
   const refreshPreview = () => {
     draft = collectPage(form, draft);
-    preview.innerHTML = profileMarkup(draft, { preview: true });
-    bindPreviewLightbox(preview, draft);
+    const previewPage = pageForCountryVariant(draft, previewRegion.value);
+    preview.innerHTML = profileMarkup(previewPage, { preview: true });
+    bindPreviewLightbox(preview, previewPage);
   };
   form.addEventListener('input', (event) => {
     if (event.target.name === 'avatarFile') return;
     refreshPreview();
   });
-  form.addEventListener('change', (event) => {
-    if (event.target.matches('.country-destination-country')) refreshCountryDestinationOptions(form);
-    refreshPreview();
-  });
-  const countryDestinationList = form.querySelector('#countryDestinationsList');
-  form.querySelector('#addCountryDestination').addEventListener('click', () => {
-    const selected = new Set(Array.from(form.querySelectorAll('.country-destination-country'))
-      .map((select) => select.value).filter(Boolean));
-    const destinationOption = COUNTRY_OPTIONS.find(({ code }) => !selected.has(code));
-    if (!destinationOption) return showToast('As quatro opções já têm um destino configurado.');
-    countryDestinationList.insertAdjacentHTML('beforeend', countryDestinationRowMarkup(destinationOption.code));
-    refreshCountryDestinationOptions(form);
-    refreshPreview();
-    countryDestinationList.lastElementChild?.querySelector('.country-destination-url')?.focus();
-  });
-  countryDestinationList.addEventListener('click', (event) => {
-    const removeButton = event.target.closest('.country-destination-remove');
-    if (!removeButton) return;
-    removeButton.closest('.country-destination-row').remove();
-    refreshCountryDestinationOptions(form);
-    refreshPreview();
-  });
-  refreshCountryDestinationOptions(form);
+  form.addEventListener('change', refreshPreview);
+  previewRegion.addEventListener('change', refreshPreview);
   form.elements.slug.addEventListener('blur', () => {
     form.elements.slug.value = toSlug(form.elements.slug.value);
     refreshPreview();
@@ -568,15 +592,6 @@ function bindEditor(page, isNew) {
     draft = current;
     if (current.slug.length < 3) return showFormMessage('O endereço precisa ter pelo menos 3 caracteres.');
     if (!current.profileName || !current.title || !current.destinationUrl || !current.buttonLabel) return showFormMessage('Preencha nome, título, texto do botão e o endereço padrão que ele vai abrir.');
-    const destinationRows = Array.from(form.querySelectorAll('.country-destination-row'));
-    const incompleteDestination = destinationRows.some((row) => {
-      const countryCode = row.querySelector('.country-destination-country').value;
-      const destinationUrl = row.querySelector('.country-destination-url').value.trim();
-      return Boolean(countryCode) !== Boolean(destinationUrl);
-    });
-    if (incompleteDestination) return showFormMessage('Cada destino personalizado precisa ter um país e um endereço.');
-    const countryCodes = destinationRows.map((row) => row.querySelector('.country-destination-country').value).filter(Boolean);
-    if (new Set(countryCodes).size !== countryCodes.length) return showFormMessage('Escolha um país diferente em cada regra.');
     for (const destinationUrl of Object.values(current.countryDestinations)) {
       try {
         const destination = new URL(destinationUrl);
