@@ -31,7 +31,7 @@ Aplicação para criar páginas de links personalizadas em endereços como `http
 - Prévia ao vivo do layout baseado no HTML de referência.
 - Página pública responsiva, modo claro/escuro e redirecionamento animado.
 - Contagem atômica de cliques no botão.
-- Destinos personalizados para Brasil, Europa, Estados Unidos e GBP/Reino Unido, escolhidos pela localização do IP e com fallback para o endereço padrão.
+- Conteúdo e aparência de página personalizados para Brasil, Europa, Estados Unidos e GBP/Reino Unido, além de destinos próprios para o botão e fallback para as demais regiões.
 - Dados em Supabase Postgres, fotos em Supabase Storage e APIs como Vercel Functions.
 - As páginas e demais caminhos legados do repositório continuam atendidos.
 
@@ -48,7 +48,7 @@ Abra `http://localhost:3000/dashboard` para entrar ou `http://localhost:3000/reg
 ### Supabase
 
 - Em uma instalação nova, execute `supabase/schema.sql` no SQL Editor para criar a tabela, as políticas RLS, o bucket de imagens e as funções de contagem e redirecionamento. A leitura pública mantém acesso apenas aos campos exibidos na página.
-- Em uma instalação existente, aplique `supabase/migrations/20261105082119_country_destinations.sql` antes de publicar a nova versão. A migração adiciona as regras por país e mantém a função antiga disponível durante a atualização. O país é inferido pelo cabeçalho `x-vercel-ip-country`; o IP do visitante não é armazenado.
+- Em uma instalação existente, aplique `supabase/migrations/20261105082119_country_destinations.sql` e `supabase/migrations/20261105092829_regional_page_customization.sql` antes de publicar esta versão. A segunda migração salva variações privadas por região e disponibiliza ao visitante somente a versão correspondente. O país/continente vem dos cabeçalhos de geolocalização da Vercel; o IP não é armazenado.
 - Configure a URL do site como `https://privame.site` e permita os redirecionamentos `https://privame.site/auth/callback` e `http://localhost:3000/auth/callback`.
 - A confirmação de e-mail depende das configurações de Auth e do SMTP do projeto.
 
