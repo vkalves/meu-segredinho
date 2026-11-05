@@ -31,7 +31,7 @@ Aplicação para criar páginas de links personalizadas em endereços como `http
 - Prévia ao vivo do layout baseado no HTML de referência.
 - Página pública responsiva, modo claro/escuro e redirecionamento animado.
 - Contagem atômica de cliques no botão.
-- Destinos personalizados por país, escolhidos pela localização aproximada do IP e com fallback para o endereço padrão.
+- Destinos personalizados para Brasil, Europa, Estados Unidos e GBP/Reino Unido, escolhidos pela localização do IP e com fallback para o endereço padrão.
 - Dados em Supabase Postgres, fotos em Supabase Storage e APIs como Vercel Functions.
 - As páginas e demais caminhos legados do repositório continuam atendidos.
 
