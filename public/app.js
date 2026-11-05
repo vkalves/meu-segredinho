@@ -6,6 +6,13 @@ const DEFAULTS = {
   onlineLabel: 'online agora', secureLabel: 'site seguro e anônimo', buttonLabel: 'MEU LINK',
 };
 
+const COUNTRY_OPTIONS = [
+  { code: 'BR', name: 'Brasil' },
+  { code: 'EU', name: 'Europa' },
+  { code: 'US', name: 'Estados Unidos' },
+  { code: 'GB', name: 'GBP — Reino Unido' },
+];
+
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -378,6 +385,34 @@ function colorInput(name, label, value) {
   return `<label class="color-field"><span>${label}</span><input type="color" name="${name}" value="${cleanColor(value, DEFAULTS[name])}" aria-label="${label}"></label>`;
 }
 
+function countryDestinationRowMarkup(countryCode = '', destinationUrl = '') {
+  const options = COUNTRY_OPTIONS.map(({ code, name }) =>
+    `<option value="${code}" ${code === countryCode ? 'selected' : ''}>${escapeHtml(name)}</option>`
+  ).join('');
+  return `<div class="country-destination-row">
+    <select class="country-destination-country" aria-label="País ou região do destino">
+      <option value="" ${countryCode ? '' : 'selected'}>Selecione uma opção</option>${options}
+    </select>
+    <input class="country-destination-url" type="url" maxlength="2048" value="${escapeHtml(destinationUrl)}" placeholder="https://destino-do-pais.com" aria-label="Endereço para a opção selecionada">
+    <button class="country-destination-remove" type="button" aria-label="Remover destino do país" title="Remover destino">×</button>
+  </div>`;
+}
+
+function countryDestinationsMarkup(page) {
+  const destinations = page.countryDestinations && typeof page.countryDestinations === 'object'
+    ? page.countryDestinations
+    : {};
+  const rows = Object.entries(destinations)
+    .filter(([code, url]) => COUNTRY_OPTIONS.some((option) => option.code === code) && typeof url === 'string')
+    .map(([code, url]) => countryDestinationRowMarkup(code, url))
+    .join('');
+  return `<div class="country-destinations">
+    <div class="country-destinations-heading"><strong>Personalizar por país ou região</strong><span>Brasil, Europa, Estados Unidos e GBP têm destinos próprios. As demais localidades usam o endereço padrão.</span></div>
+    <div class="country-destinations-list" id="countryDestinationsList">${rows}</div>
+    <button class="btn-secondary country-destination-add" id="addCountryDestination" type="button">+ Adicionar destino</button>
+  </div>`;
+}
+
 function editorFormMarkup(page, isNew) {
   const profileName = page.profileName || state.user.name;
   const initialsLabel = page.avatarUrl ? '' : escapeHtml(initials(profileName));
@@ -395,7 +430,8 @@ function editorFormMarkup(page, isNew) {
         <section class="editor-card"><div class="editor-card-head"><span class="step-number">02</span><div><h2>O que as pessoas vão ver</h2><p>Conteúdo principal e destino do seu botão.</p></div></div>
           ${editorField('Título', 'title', page.title, { max: 70, required: true, placeholder: 'Ex.: Ficou curioso?' })}
           ${editorField('Subtítulo', 'subtitle', page.subtitle, { type: 'textarea', max: 180, placeholder: 'Uma frase curta para apresentar seu conteúdo.' })}
-          ${editorField('Endereço que o botão vai abrir', 'destinationUrl', page.destinationUrl || '', { type: 'url', required: true, placeholder: 'https://seusite.com' , hint: 'Cole um endereço completo, começando com https://.' })}
+          ${editorField('Endereço padrão do botão', 'destinationUrl', page.destinationUrl || '', { type: 'url', required: true, placeholder: 'https://seusite.com' , hint: 'Destino usado quando o país não tem uma regra personalizada. Cole um endereço completo, começando com https://.' })}
+          ${countryDestinationsMarkup(page)}
           ${editorField('Texto do botão', 'buttonLabel', page.buttonLabel, { max: 36, required: true, placeholder: 'ACESSAR MEU LINK' })}
           <div class="switch-row"><div class="switch-copy"><strong>Mostrar selo verificado</strong><span>Exibe o selo azul ao lado do nome.</span></div><label class="switch"><input type="checkbox" name="verified" ${page.verified ? 'checked' : ''}><span class="switch-track"></span></label></div>
           <div class="switch-row"><div class="switch-copy"><strong>Mostrar status online</strong><span>Exibe um pequeno status acima do botão.</span></div><label class="switch"><input type="checkbox" name="showOnline" ${page.showOnline ? 'checked' : ''}><span class="switch-track"></span></label></div>
@@ -417,6 +453,16 @@ function editorFormMarkup(page, isNew) {
   </div>`;
 }
 
+function refreshCountryDestinationOptions(form) {
+  const selects = Array.from(form.querySelectorAll('.country-destination-country'));
+  for (const select of selects) {
+    const selectedElsewhere = new Set(selects.filter((other) => other !== select).map((other) => other.value).filter(Boolean));
+    for (const option of select.options) {
+      option.disabled = Boolean(option.value && selectedElsewhere.has(option.value));
+    }
+  }
+}
+
 function collectPage(form, previous) {
   const data = Object.fromEntries(new FormData(form).entries());
   return {
@@ -424,6 +470,12 @@ function collectPage(form, previous) {
     slug: data.slug.trim(), profileName: data.profileName.trim(), title: data.title.trim(),
     subtitle: data.subtitle.trim(), destinationUrl: data.destinationUrl.trim(),
     buttonLabel: data.buttonLabel.trim(), avatarUrl: data.avatarUrl.trim(),
+    countryDestinations: Array.from(form.querySelectorAll('.country-destination-row')).reduce((destinations, row) => {
+      const countryCode = row.querySelector('.country-destination-country').value.trim().toUpperCase();
+      const destinationUrl = row.querySelector('.country-destination-url').value.trim();
+      if (countryCode && destinationUrl) destinations[countryCode] = destinationUrl;
+      return destinations;
+    }, {}),
     onlineLabel: data.onlineLabel.trim(), secureLabel: data.secureLabel.trim(),
     verified: form.elements.verified.checked, showOnline: form.elements.showOnline.checked,
     primaryColor: data.primaryColor, secondaryColor: data.secondaryColor,
@@ -444,7 +496,29 @@ function bindEditor(page, isNew) {
     if (event.target.name === 'avatarFile') return;
     refreshPreview();
   });
-  form.addEventListener('change', refreshPreview);
+  form.addEventListener('change', (event) => {
+    if (event.target.matches('.country-destination-country')) refreshCountryDestinationOptions(form);
+    refreshPreview();
+  });
+  const countryDestinationList = form.querySelector('#countryDestinationsList');
+  form.querySelector('#addCountryDestination').addEventListener('click', () => {
+    const selected = new Set(Array.from(form.querySelectorAll('.country-destination-country'))
+      .map((select) => select.value).filter(Boolean));
+    const destinationOption = COUNTRY_OPTIONS.find(({ code }) => !selected.has(code));
+    if (!destinationOption) return showToast('As quatro opções já têm um destino configurado.');
+    countryDestinationList.insertAdjacentHTML('beforeend', countryDestinationRowMarkup(destinationOption.code));
+    refreshCountryDestinationOptions(form);
+    refreshPreview();
+    countryDestinationList.lastElementChild?.querySelector('.country-destination-url')?.focus();
+  });
+  countryDestinationList.addEventListener('click', (event) => {
+    const removeButton = event.target.closest('.country-destination-remove');
+    if (!removeButton) return;
+    removeButton.closest('.country-destination-row').remove();
+    refreshCountryDestinationOptions(form);
+    refreshPreview();
+  });
+  refreshCountryDestinationOptions(form);
   form.elements.slug.addEventListener('blur', () => {
     form.elements.slug.value = toSlug(form.elements.slug.value);
     refreshPreview();
@@ -493,7 +567,22 @@ function bindEditor(page, isNew) {
     form.elements.slug.value = current.slug;
     draft = current;
     if (current.slug.length < 3) return showFormMessage('O endereço precisa ter pelo menos 3 caracteres.');
-    if (!current.profileName || !current.title || !current.destinationUrl || !current.buttonLabel) return showFormMessage('Preencha nome, título, texto do botão e o endereço que ele vai abrir.');
+    if (!current.profileName || !current.title || !current.destinationUrl || !current.buttonLabel) return showFormMessage('Preencha nome, título, texto do botão e o endereço padrão que ele vai abrir.');
+    const destinationRows = Array.from(form.querySelectorAll('.country-destination-row'));
+    const incompleteDestination = destinationRows.some((row) => {
+      const countryCode = row.querySelector('.country-destination-country').value;
+      const destinationUrl = row.querySelector('.country-destination-url').value.trim();
+      return Boolean(countryCode) !== Boolean(destinationUrl);
+    });
+    if (incompleteDestination) return showFormMessage('Cada destino personalizado precisa ter um país e um endereço.');
+    const countryCodes = destinationRows.map((row) => row.querySelector('.country-destination-country').value).filter(Boolean);
+    if (new Set(countryCodes).size !== countryCodes.length) return showFormMessage('Escolha um país diferente em cada regra.');
+    for (const destinationUrl of Object.values(current.countryDestinations)) {
+      try {
+        const destination = new URL(destinationUrl);
+        if (!['http:', 'https:'].includes(destination.protocol)) throw new Error();
+      } catch { return showFormMessage('Informe um endereço válido para cada país, começando com https://.'); }
+    }
     if (current.avatarUrl && !/^https:\/\//i.test(current.avatarUrl) && !/^data:image\/(jpeg|png|webp);base64,/i.test(current.avatarUrl)) return showFormMessage('Use uma imagem HTTPS ou escolha um arquivo do seu dispositivo.');
     try {
       const destination = new URL(current.destinationUrl);
