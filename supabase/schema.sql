@@ -121,3 +121,5 @@ $$;
 
 revoke all on function public.increment_page_clicks(text, text) from public, anon, authenticated;
 grant execute on function public.increment_page_clicks(text, text) to anon, service_role;
+
+notify pgrst, 'reload schema';
