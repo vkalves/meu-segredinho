@@ -3,6 +3,9 @@
   "framework": null,
   "buildCommand": "node scripts/build.mjs",
   "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/", "destination": "/login", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/dashboard", "destination": "/app-shell.html" },
     { "source": "/login", "destination": "/app-shell.html" },
