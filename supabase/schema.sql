@@ -10,6 +10,7 @@ create table if not exists public.pages (
   subtitle text not null default '' check (char_length(subtitle) <= 180),
   button_label text not null check (char_length(button_label) between 1 and 36),
   destination_url text not null check (destination_url ~* '^https?://'),
+  country_destinations jsonb not null default '{}'::jsonb constraint pages_country_destinations_object check (jsonb_typeof(country_destinations) = 'object'),
   avatar_url text not null default '',
   primary_color text not null default '#2AABEE' check (primary_color ~ '^#[0-9a-fA-F]{6}$'),
   secondary_color text not null default '#229ED9' check (secondary_color ~ '^#[0-9a-fA-F]{6}$'),
@@ -99,3 +100,24 @@ $$;
 
 revoke all on function public.increment_page_clicks(text) from public, anon, authenticated;
 grant execute on function public.increment_page_clicks(text) to anon, service_role;
+
+-- Keep the original overload available while older deployed code uses it.
+create or replace function public.increment_page_clicks(page_slug text, country_code text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  target_url text;
+begin
+  update public.pages
+  set clicks = clicks + 1
+  where slug = page_slug
+  returning coalesce(nullif(country_destinations ->> upper(country_code), ''), destination_url) into target_url;
+  return target_url;
+end;
+$$;
+
+revoke all on function public.increment_page_clicks(text, text) from public, anon, authenticated;
+grant execute on function public.increment_page_clicks(text, text) to anon, service_role;
