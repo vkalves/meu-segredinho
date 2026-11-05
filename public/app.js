@@ -73,6 +73,7 @@ function logo() {
 }
 
 function renderAuth(register = false) {
+  document.body.classList.remove('legacy-profile-active');
   document.title = `${register ? 'Criar conta' : 'Entrar'} — Privame`;
   app.innerHTML = `
     <main class="auth-layout">
@@ -195,6 +196,7 @@ function dashboardContent(active = 'overview') {
 }
 
 function renderDashboard(active = 'overview') {
+  document.body.classList.remove('legacy-profile-active');
   document.title = 'Seu espaço — Privame';
   shell(dashboardContent(active), active);
   document.querySelectorAll('[data-action="create"]').forEach((button) => button.addEventListener('click', () => go('/create')));
@@ -303,6 +305,23 @@ function profileMarkup(page, { preview = false, theme = 'light' } = {}) {
 }
 
 function bindPreviewLightbox(container, page) {
+  const avatar = container.querySelector('#avatarImg');
+  if (avatar?.tagName === 'IMG') {
+    const showFallback = () => {
+      if (!avatar.isConnected) return;
+      const fallback = document.createElement('div');
+      fallback.className = 'avatar avatar-fallback';
+      fallback.id = 'avatarImg';
+      fallback.setAttribute('role', 'img');
+      fallback.setAttribute('aria-label', 'Foto indisponível para ' + (page.profileName || 'este perfil'));
+      fallback.textContent = initials(page.profileName);
+      avatar.replaceWith(fallback);
+      container.querySelector('#avatarLightbox')?.remove();
+      container.querySelector('#avatarRing')?.setAttribute('aria-label', 'Foto de perfil indisponível');
+    };
+    avatar.addEventListener('error', showFallback, { once: true });
+    if (avatar.complete && avatar.naturalWidth === 0) showFallback();
+  }
   const ring = container.querySelector('#avatarRing');
   const lightbox = container.querySelector('#avatarLightbox');
   if (!ring || !lightbox || !page.avatarUrl) return;
@@ -355,7 +374,7 @@ function editorFormMarkup(page, isNew) {
         <section class="editor-card"><div class="editor-card-head"><span class="step-number">01</span><div><h2>Seu endereço e perfil</h2><p>Escolha um endereço simples para colocar na bio.</p></div></div>
           <div class="form-field"><label for="field-slug">Endereço da sua página</label><div class="slug-input-wrap"><span class="slug-prefix">${escapeHtml(state.baseUrl.replace(/\/$/, ''))}/</span><input id="field-slug" name="slug" value="${escapeHtml(page.slug)}" maxlength="30" minlength="3" pattern="[a-zA-Z0-9-]+" autocomplete="off" required aria-describedby="slugHint"></div><span class="field-hint" id="slugHint">Use de 3 a 30 letras, números ou hífens. ${isNew ? 'Você pode trocar depois.' : 'Trocar o endereço antigo pode quebrar links já compartilhados.'}</span></div>
           <div class="avatar-upload"><div class="avatar-upload-preview" id="avatarPreview">${imagePreview}</div><div class="avatar-upload-text"><strong>Foto de perfil</strong><p>PNG, JPG ou WebP. Até 2 MB.</p><label class="btn-secondary" for="avatarFile" style="min-height:32px;padding:0 11px;font-size:10px;cursor:pointer">Escolher imagem</label><input class="file-picker" id="avatarFile" name="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"></div></div>
-          ${editorField('Ou cole o endereço da imagem', 'avatarUrl', page.avatarUrl || '', { type: 'url', placeholder: 'https://...' })}
+          ${editorField('Ou cole o endereço da imagem', 'avatarUrl', page.avatarUrl || '', { type: 'url', placeholder: 'https://...', hint: 'Use um link direto para o arquivo da imagem. Links de Gmail ou de páginas não exibem a foto.' })}
           ${editorField('Nome no perfil', 'profileName', profileName, { max: 50, required: true })}
         </section>
         <section class="editor-card"><div class="editor-card-head"><span class="step-number">02</span><div><h2>O que as pessoas vão ver</h2><p>Conteúdo principal e destino do seu botão.</p></div></div>
@@ -504,12 +523,14 @@ function bindEditor(page, isNew) {
 }
 
 function renderEditor(page, isNew) {
+  document.body.classList.add('legacy-profile-active');
   document.title = `${isNew ? 'Nova página' : 'Editar página'} — Privame`;
   shell(editorFormMarkup(page, isNew), 'pages');
   bindEditor(page, isNew);
 }
 
 function renderPublicPage(page, theme = 'light') {
+  document.body.classList.add('legacy-profile-active');
   document.title = (page.profileName || 'Perfil') + ' | ' + (page.title || 'Privame');
   app.innerHTML = profileMarkup(page, { theme });
   const root = app.querySelector('.legacy-profile-page');
@@ -638,6 +659,7 @@ function renderPublicPage(page, theme = 'light') {
   }
 }
 function notFound() {
+  document.body.classList.remove('legacy-profile-active');
   document.title = 'Página não encontrada — Privame';
   app.innerHTML = `<main class="not-found"><div class="not-found-card"><div class="empty-art" style="margin:0 auto 18px">↗</div><h1>Esse link ainda não existe</h1><p>Confira se o endereço está certo ou volte ao início.</p><a class="btn-primary" href="/dashboard" data-link>Ir para o Privame</a></div></main>`;
   bindInternalLinks();
@@ -681,6 +703,7 @@ async function renderPublicSlug(slug) {
 }
 
 async function renderRoute() {
+  document.body.classList.remove('legacy-profile-active');
   const pathname = decodeURIComponent(window.location.pathname.replace(/\/$/, '') || '/');
   const route = pathname === '/' ? '/' : pathname;
   if (route === '/auth/callback') return finishAuthCallback();

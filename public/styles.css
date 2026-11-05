@@ -308,5 +308,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .editor-card { padding: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  body:not(.legacy-profile-active) *, body:not(.legacy-profile-active) *::before, body:not(.legacy-profile-active) *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
