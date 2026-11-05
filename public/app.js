@@ -262,38 +262,73 @@ function moonIcon() {
 
 function profileMarkup(page, { preview = false, theme = 'light' } = {}) {
   const name = page.profileName || 'Seu nome';
+  const darkClass = theme === 'dark' ? ' dark-mode' : '';
+  const previewClass = preview ? ' preview-mode' : '';
+  const colorStyle = theme === 'dark' ? '' : ' style="--privacy-grad-start:' + cleanColor(page.primaryColor, DEFAULTS.primaryColor)
+    + ';--privacy-grad-end:' + cleanColor(page.secondaryColor, DEFAULTS.secondaryColor)
+    + ';--bg-grad-start:' + cleanColor(page.backgroundColor, DEFAULTS.backgroundColor)
+    + ';--card-bg:' + cleanColor(page.cardColor, DEFAULTS.cardColor)
+    + ';--privacy-text:' + cleanColor(page.textColor, DEFAULTS.textColor) + '"';
   const avatar = page.avatarUrl
-    ? `<img class="profile-avatar" src="${escapeHtml(page.avatarUrl)}" alt="Foto de ${escapeHtml(name)}" draggable="false">`
-    : `<div class="profile-avatar avatar-fallback" aria-label="${escapeHtml(name)}">${escapeHtml(initials(name))}</div>`;
+    ? '<img src="' + escapeHtml(page.avatarUrl) + '" class="avatar" id="avatarImg" alt="Foto de ' + escapeHtml(name) + '" width="126" height="126" loading="eager" fetchpriority="high" decoding="async" draggable="false">'
+    : '<div class="avatar avatar-fallback" id="avatarImg" role="img" aria-label="Foto de ' + escapeHtml(name) + '">' + escapeHtml(initials(name)) + '</div>';
+  const telegramIcon = '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg>';
+  const buttonLabel = escapeHtml(page.buttonLabel || 'MEU LINK');
   const button = preview
-    ? `<button class="profile-button" type="button" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.665 3.717 2.935 10.554c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434Z"/></svg><span>${escapeHtml(page.buttonLabel || 'ACESSAR LINK')}</span></button>`
-    : `<a class="profile-button" href="/api/go/${encodeURIComponent(page.slug)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.665 3.717 2.935 10.554c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434Z"/></svg><span>${escapeHtml(page.buttonLabel || 'ACESSAR LINK')}</span></a>`;
-  const themeControl = preview ? '' : `<button class="public-theme" type="button" data-theme aria-label="Alternar modo de cor">${moonIcon()}</button>`;
-  const ring = `<svg class="profile-ring" viewBox="0 0 136 136" aria-hidden="true"><circle cx="68" cy="68" r="64"/></svg>`;
-  return `<div class="public-page ${theme === 'dark' ? 'dark' : ''} ${preview ? 'preview-mode' : ''}" style="${styleVars(page)}"><div class="public-profile">
-    <main class="profile-card">${themeControl}<button class="profile-avatar-wrap" type="button" aria-label="Ampliar foto de ${escapeHtml(name)}">${avatar}${ring}</button>
-      <div class="profile-badge"><span class="profile-badge-name">${escapeHtml(name)}</span>${page.verified ? publicMark() : ''}</div>
-      <h1 class="profile-title">${escapeHtml(page.title || 'Seu título')}</h1>
-      ${page.subtitle ? `<p class="profile-subtitle">${escapeHtml(page.subtitle)}</p>` : ''}
-      ${page.showOnline ? `<div class="profile-online"><span class="dot"></span>${escapeHtml(page.onlineLabel || 'online agora')}</div>` : ''}
-      ${button}
-      ${page.secureLabel ? `<div class="profile-secure"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>${escapeHtml(page.secureLabel)}</span></div>` : ''}
-    </main><div class="public-branding">feito com privame</div></div></div>`;
+    ? '<button class="btn btn-telegram" id="telegramBtn" type="button" tabindex="-1">' + telegramIcon + buttonLabel + '</button>'
+    : '<a href="/api/go/' + encodeURIComponent(page.slug || '') + '" class="btn btn-telegram" id="telegramBtn" rel="noopener noreferrer">' + telegramIcon + buttonLabel + '</a>';
+  const themeControl = preview ? '' : '<div class="theme-toggle-wrap"><button class="theme-toggle" id="themeToggle" data-theme type="button" aria-label="Ativar modo escuro"><svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#4a4a4a"/></svg><svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="#f2c94c"/><g stroke="#f2c94c" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="6.6" y2="6.6"/><line x1="17.4" y1="17.4" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="6.6" y2="17.4"/><line x1="17.4" y1="6.6" x2="19.1" y2="4.9"/></g></svg></button></div>';
+  const verified = page.verified
+    ? '<span class="verified-icon" id="verifiedIcon" aria-label="Conta verificada">' + publicMark() + '</span>'
+    : '';
+  const online = page.showOnline
+    ? '<div class="online-status"><span class="dot"></span>' + escapeHtml(page.onlineLabel || 'online agora') + '</div>'
+    : '';
+  const secure = page.secureLabel
+    ? '<div class="secure-badge"><svg class="lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' + escapeHtml(page.secureLabel) + '</div>'
+    : '';
+  const lightbox = page.avatarUrl
+    ? '<div class="avatar-lightbox" id="avatarLightbox" role="dialog" aria-label="Foto de perfil ampliada"><div class="lightbox-inner"><div class="lightbox-shimmer"></div><div class="lightbox-ring"></div><img src="' + escapeHtml(page.avatarUrl) + '" class="avatar-lightbox-img" id="lightboxImg" alt="Foto de ' + escapeHtml(name) + '" width="330" height="330" decoding="async" draggable="false"></div></div>'
+    : '';
+  return '<div class="legacy-profile-page' + darkClass + previewClass + '"' + colorStyle + '>'
+    + '<main class="card">' + themeControl
+    + '<button class="avatar-ring" id="avatarRing" type="button" aria-label="Ampliar foto de ' + escapeHtml(name) + '">' + avatar
+    + '<svg class="story-ring-svg" viewBox="0 0 136 136" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><mask id="storyRingReveal" maskUnits="userSpaceOnUse" x="0" y="0" width="136" height="136"><rect x="0" y="0" width="136" height="136" fill="black"/><circle class="story-ring-reveal" id="ringReveal" cx="68" cy="68" r="64"/></mask></defs><circle class="story-ring-track" cx="68" cy="68" r="64"/><circle class="story-ring-arc" id="ringArc" cx="68" cy="68" r="64" mask="url(#storyRingReveal)"/><circle class="story-ring-solid" id="ringSolid" cx="68" cy="68" r="64"/></svg></button>'
+    + '<div class="badge"><span class="badge-name"><span id="profile-name">' + escapeHtml(name) + '</span>' + verified + '</span></div>'
+    + '<div class="title">' + escapeHtml(page.title || 'Seu título') + '</div>'
+    + (page.subtitle ? '<div class="subtitle">' + escapeHtml(page.subtitle) + '</div>' : '')
+    + online + button + secure + '</main>' + lightbox
+    + '<div class="redirect-screen" id="redirectScreen" aria-live="polite"><div class="redirect-text">abrindo seu link...</div><div class="redirect-progress-track"><div class="redirect-progress-fill" id="redirectProgressFill"></div></div></div>'
+    + '</div>';
 }
 
 function bindPreviewLightbox(container, page) {
-  const openButton = container.querySelector('.profile-avatar-wrap');
-  if (openButton && page.avatarUrl) openButton.addEventListener('click', () => {
-    const modal = document.createElement('div');
-    modal.className = 'profile-lightbox';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-label', 'Foto de perfil ampliada');
-    modal.innerHTML = `<img src="${escapeHtml(page.avatarUrl)}" alt="Foto de ${escapeHtml(page.profileName || 'perfil')}">`;
-    modal.addEventListener('click', () => modal.remove());
-    document.body.append(modal);
+  const ring = container.querySelector('#avatarRing');
+  const lightbox = container.querySelector('#avatarLightbox');
+  if (!ring || !lightbox || !page.avatarUrl) return;
+  let autoClose;
+  let holdTimer;
+  const closeLightbox = () => {
+    lightbox.classList.remove('open');
+    clearTimeout(autoClose);
+  };
+  const openLightbox = () => {
+    lightbox.classList.add('open');
+    clearTimeout(autoClose);
+    autoClose = setTimeout(closeLightbox, 2000);
+  };
+  ring.addEventListener('click', openLightbox);
+  ring.addEventListener('contextmenu', (event) => event.preventDefault());
+  ring.addEventListener('touchstart', () => {
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(openLightbox, 280);
+  }, { passive: true });
+  ring.addEventListener('touchend', () => clearTimeout(holdTimer));
+  ring.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+  lightbox.addEventListener('click', (event) => {
+    if (event.target === lightbox) closeLightbox();
   });
 }
-
 function editorField(label, name, value, { type = 'text', placeholder = '', hint = '', max = '', required = false } = {}) {
   const id = `field-${name}`;
   const maxLength = max ? `maxlength="${max}"` : '';
@@ -475,29 +510,133 @@ function renderEditor(page, isNew) {
 }
 
 function renderPublicPage(page, theme = 'light') {
-  document.title = `${page.profileName} | ${page.title}`;
+  document.title = (page.profileName || 'Perfil') + ' | ' + (page.title || 'Privame');
   app.innerHTML = profileMarkup(page, { theme });
-  bindPreviewLightbox(app, page);
-  app.querySelector('[data-theme]')?.addEventListener('click', () => {
-    const nextTheme = app.querySelector('.public-page').classList.contains('dark') ? 'light' : 'dark';
-    try { localStorage.setItem(`privame-theme-${page.slug}`, nextTheme); } catch {}
-    renderPublicPage(page, nextTheme);
-  });
-  app.querySelector('.profile-button')?.addEventListener('click', (event) => {
-    event.preventDefault();
-    const link = event.currentTarget;
-    const screen = document.createElement('div');
-    screen.className = 'redirect-screen';
-    screen.innerHTML = `<span class="redirect-label">Abrindo seu link…</span><div class="redirect-track"><div class="redirect-progress"></div></div>`;
-    document.body.append(screen);
-    requestAnimationFrame(() => {
-      screen.classList.add('open');
-      screen.querySelector('.redirect-progress').style.width = '100%';
-    });
-    setTimeout(() => { window.location.href = link.href; }, 650);
-  });
-}
+  const root = app.querySelector('.legacy-profile-page');
+  const card = app.querySelector('.card');
+  const themeButton = app.querySelector('#themeToggle');
+  const verified = app.querySelector('#verifiedIcon');
+  const arc = app.querySelector('#ringArc');
+  const solid = app.querySelector('#ringSolid');
+  const reveal = app.querySelector('#ringReveal');
 
+  bindPreviewLightbox(app, page);
+
+  if (themeButton) {
+    const syncThemeLabel = () => themeButton.setAttribute('aria-label', root.classList.contains('dark-mode') ? 'Ativar modo claro' : 'Ativar modo escuro');
+    syncThemeLabel();
+    themeButton.addEventListener('click', () => {
+      const nextTheme = root.classList.contains('dark-mode') ? 'light' : 'dark';
+      try { localStorage.setItem('privame-theme-' + page.slug, nextTheme); } catch {}
+      renderPublicPage(page, nextTheme);
+    });
+  }
+
+  if (verified) {
+    setTimeout(() => {
+      verified.classList.add('pulse');
+      verified.addEventListener('animationend', function removePulse() {
+        verified.classList.remove('pulse');
+        verified.removeEventListener('animationend', removePulse);
+      }, { once: true });
+    }, 3000);
+  }
+
+  if (arc && solid && reveal) {
+    const circumference = 402.1;
+    let stopped = false;
+    const setReveal = (value) => { reveal.style.strokeDashoffset = value; };
+    const setOpacity = (element, value) => { element.style.opacity = value; };
+    const easeInOut = (value) => value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+    const easeOutQuart = (value) => 1 - Math.pow(1 - value, 4);
+    const startCycle = () => {
+      setOpacity(arc, 1);
+      setOpacity(solid, 0);
+      setReveal(circumference);
+      arc.style.strokeDasharray = '6 5';
+      let start = null;
+      const draw = (time) => {
+        if (stopped) return;
+        if (start === null) start = time;
+        const progress = Math.min((time - start) / 430, 1);
+        setReveal(circumference * (1 - easeInOut(progress)));
+        if (progress < 1) {
+          requestAnimationFrame(draw);
+          return;
+        }
+        setReveal(0);
+        let closeStart = null;
+        const closeRing = (now) => {
+          if (stopped) return;
+          if (closeStart === null) closeStart = now;
+          const progressClose = Math.min((now - closeStart) / 340, 1);
+          const eased = easeOutQuart(progressClose);
+          setOpacity(arc, 1 - eased);
+          setOpacity(solid, eased);
+          arc.style.strokeDasharray = '6 ' + (5 * (1 - eased)).toFixed(2);
+          if (progressClose < 1) {
+            requestAnimationFrame(closeRing);
+            return;
+          }
+          setOpacity(arc, 0);
+          setOpacity(solid, 1);
+          stopped = true;
+          solid.classList.add('ring-blink');
+          solid.addEventListener('animationend', () => solid.classList.remove('ring-blink'), { once: true });
+        };
+        requestAnimationFrame(closeRing);
+      };
+      requestAnimationFrame(draw);
+    };
+    setReveal(circumference);
+    setOpacity(arc, 1);
+    setOpacity(solid, 0);
+    setTimeout(startCycle, 300);
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted && !stopped) {
+        stopped = true;
+        setReveal(0);
+        setOpacity(arc, 0);
+        setOpacity(solid, 1);
+      }
+    });
+  }
+
+  const button = app.querySelector('#telegramBtn');
+  const screen = app.querySelector('#redirectScreen');
+  const fill = app.querySelector('#redirectProgressFill');
+  if (button && button.tagName === 'A' && screen && fill && card) {
+    let redirecting = false;
+    const resetRedirectUI = () => {
+      redirecting = false;
+      fill.style.width = '0%';
+      screen.classList.remove('open');
+      card.classList.remove('card-hidden');
+    };
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (redirecting) return;
+      redirecting = true;
+      const destination = button.getAttribute('href');
+      card.classList.add('card-hidden');
+      screen.classList.add('open');
+      fill.style.width = '0%';
+      let start = null;
+      const progress = (time) => {
+        if (start === null) start = time;
+        const percent = Math.min((time - start) / 1000, 1);
+        fill.style.width = (percent * 100) + '%';
+        if (percent < 1) requestAnimationFrame(progress);
+        else window.location.href = destination;
+      };
+      requestAnimationFrame(progress);
+    });
+    window.addEventListener('pageshow', resetRedirectUI);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') resetRedirectUI();
+    });
+  }
+}
 function notFound() {
   document.title = 'Página não encontrada — Privame';
   app.innerHTML = `<main class="not-found"><div class="not-found-card"><div class="empty-art" style="margin:0 auto 18px">↗</div><h1>Esse link ainda não existe</h1><p>Confira se o endereço está certo ou volte ao início.</p><a class="btn-primary" href="/dashboard" data-link>Ir para o Privame</a></div></main>`;
@@ -555,6 +694,7 @@ async function renderRoute() {
     if (session.baseUrl) state.baseUrl = session.baseUrl;
   } catch { state.user = null; }
 
+
   if (route === '/login' || route === '/register' || route === '/') {
     if (state.user) {
       go('/dashboard', true);
@@ -590,11 +730,12 @@ async function renderRoute() {
     } catch (error) { showToast(error.message); go('/dashboard', true); }
     return;
   }
+
   notFound();
 }
 
 window.addEventListener('popstate', renderRoute);
 window.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') document.querySelector('.profile-lightbox')?.remove();
+  if (event.key === 'Escape') document.querySelectorAll('.avatar-lightbox.open').forEach((lightbox) => lightbox.classList.remove('open'));
 });
 renderRoute();
