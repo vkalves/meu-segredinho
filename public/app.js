@@ -6,15 +6,12 @@ const DEFAULTS = {
   onlineLabel: 'online agora', secureLabel: 'site seguro e anônimo', buttonLabel: 'MEU LINK',
 };
 
-const COUNTRY_CODES = 'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW'.split(' ');
-const COUNTRY_NAMES = typeof Intl.DisplayNames === 'function'
-  ? new Intl.DisplayNames(['pt-BR'], { type: 'region' })
-  : null;
-const COUNTRY_OPTIONS = COUNTRY_CODES.map((code) => ({
-  code,
-  name: COUNTRY_NAMES?.of(code) || code,
-})).sort((left, right) => left.name.localeCompare(right.name, 'pt-BR') || left.code.localeCompare(right.code));
-
+const COUNTRY_OPTIONS = [
+  { code: 'BR', name: 'Brasil' },
+  { code: 'EU', name: 'Europa' },
+  { code: 'US', name: 'Estados Unidos' },
+  { code: 'GB', name: 'GBP — Reino Unido' },
+];
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (character) => ({
@@ -393,11 +390,11 @@ function countryDestinationRowMarkup(countryCode = '', destinationUrl = '') {
     `<option value="${code}" ${code === countryCode ? 'selected' : ''}>${escapeHtml(name)}</option>`
   ).join('');
   return `<div class="country-destination-row">
-    <select class="country-destination-country" aria-label="País do destino">
-      <option value="" ${countryCode ? '' : 'selected'}>Selecione um país</option>${options}
+    <select class="country-destination-country" aria-label="País ou região do destino">
+      <option value="" ${countryCode ? '' : 'selected'}>Selecione uma opção</option>${options}
     </select>
-    <input class="country-destination-url" type="url" maxlength="2048" value="${escapeHtml(destinationUrl)}" placeholder="https://destino-do-pais.com" aria-label="Endereço para o país selecionado">
-    <button class="country-destination-remove" type="button" aria-label="Remover destino do país" title="Remover país">×</button>
+    <input class="country-destination-url" type="url" maxlength="2048" value="${escapeHtml(destinationUrl)}" placeholder="https://destino-do-pais.com" aria-label="Endereço para a opção selecionada">
+    <button class="country-destination-remove" type="button" aria-label="Remover destino do país" title="Remover destino">×</button>
   </div>`;
 }
 
@@ -406,13 +403,13 @@ function countryDestinationsMarkup(page) {
     ? page.countryDestinations
     : {};
   const rows = Object.entries(destinations)
-    .filter(([code, url]) => /^[A-Z]{2}$/.test(code) && typeof url === 'string')
+    .filter(([code, url]) => COUNTRY_OPTIONS.some((option) => option.code === code) && typeof url === 'string')
     .map(([code, url]) => countryDestinationRowMarkup(code, url))
     .join('');
   return `<div class="country-destinations">
-    <div class="country-destinations-heading"><strong>Personalizar por país</strong><span>O país é identificado pelo IP. Quem não tiver uma regra usa o endereço padrão.</span></div>
+    <div class="country-destinations-heading"><strong>Personalizar por país ou região</strong><span>Brasil, Europa, Estados Unidos e GBP têm destinos próprios. As demais localidades usam o endereço padrão.</span></div>
     <div class="country-destinations-list" id="countryDestinationsList">${rows}</div>
-    <button class="btn-secondary country-destination-add" id="addCountryDestination" type="button">+ Adicionar país</button>
+    <button class="btn-secondary country-destination-add" id="addCountryDestination" type="button">+ Adicionar destino</button>
   </div>`;
 }
 
@@ -507,9 +504,9 @@ function bindEditor(page, isNew) {
   form.querySelector('#addCountryDestination').addEventListener('click', () => {
     const selected = new Set(Array.from(form.querySelectorAll('.country-destination-country'))
       .map((select) => select.value).filter(Boolean));
-    const countryCode = !selected.has('BR') ? 'BR' : COUNTRY_CODES.find((code) => !selected.has(code));
-    if (!countryCode) return showToast('Todos os países já têm um destino configurado.');
-    countryDestinationList.insertAdjacentHTML('beforeend', countryDestinationRowMarkup(countryCode));
+    const destinationOption = COUNTRY_OPTIONS.find(({ code }) => !selected.has(code));
+    if (!destinationOption) return showToast('As quatro opções já têm um destino configurado.');
+    countryDestinationList.insertAdjacentHTML('beforeend', countryDestinationRowMarkup(destinationOption.code));
     refreshCountryDestinationOptions(form);
     refreshPreview();
     countryDestinationList.lastElementChild?.querySelector('.country-destination-url')?.focus();
