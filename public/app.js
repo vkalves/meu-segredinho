@@ -21,6 +21,20 @@ function initials(value) {
   return String(value || '?').trim().split(/\s+/).slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || '?';
 }
 
+function profileImageUrl(value) {
+  const candidate = String(value || '').trim();
+  if (!candidate) return '';
+  if (/^data:image\//i.test(candidate)) return candidate;
+  try {
+    const url = new URL(candidate);
+    if (!['http:', 'https:'].includes(url.protocol)) return '';
+    if (url.hostname.toLowerCase() === 'mail.google.com' && url.pathname.startsWith('/mail/')) return '';
+    return candidate;
+  } catch {
+    return '';
+  }
+}
+
 async function api(path, options = {}) {
   const response = await fetch(path, {
     credentials: 'same-origin',
@@ -264,6 +278,7 @@ function moonIcon() {
 
 function profileMarkup(page, { preview = false, theme = 'light' } = {}) {
   const name = page.profileName || 'Seu nome';
+  const imageUrl = profileImageUrl(page.avatarUrl);
   const darkClass = theme === 'dark' ? ' dark-mode' : '';
   const previewClass = preview ? ' preview-mode' : '';
   const colorStyle = theme === 'dark' ? '' : ' style="--privacy-grad-start:' + cleanColor(page.primaryColor, DEFAULTS.primaryColor)
@@ -271,8 +286,8 @@ function profileMarkup(page, { preview = false, theme = 'light' } = {}) {
     + ';--bg-grad-start:' + cleanColor(page.backgroundColor, DEFAULTS.backgroundColor)
     + ';--card-bg:' + cleanColor(page.cardColor, DEFAULTS.cardColor)
     + ';--privacy-text:' + cleanColor(page.textColor, DEFAULTS.textColor) + '"';
-  const avatar = page.avatarUrl
-    ? '<img src="' + escapeHtml(page.avatarUrl) + '" class="avatar" id="avatarImg" alt="Foto de ' + escapeHtml(name) + '" width="126" height="126" loading="eager" fetchpriority="high" decoding="async" draggable="false">'
+  const avatar = imageUrl
+    ? '<img src="' + escapeHtml(imageUrl) + '" class="avatar" id="avatarImg" alt="Foto de ' + escapeHtml(name) + '" width="126" height="126" loading="eager" fetchpriority="high" decoding="async" draggable="false">'
     : '<div class="avatar avatar-fallback" id="avatarImg" role="img" aria-label="Foto de ' + escapeHtml(name) + '">' + escapeHtml(initials(name)) + '</div>';
   const telegramIcon = '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/></svg>';
   const buttonLabel = escapeHtml(page.buttonLabel || 'MEU LINK');
@@ -289,8 +304,8 @@ function profileMarkup(page, { preview = false, theme = 'light' } = {}) {
   const secure = page.secureLabel
     ? '<div class="secure-badge"><svg class="lock-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>' + escapeHtml(page.secureLabel) + '</div>'
     : '';
-  const lightbox = page.avatarUrl
-    ? '<div class="avatar-lightbox" id="avatarLightbox" role="dialog" aria-label="Foto de perfil ampliada"><div class="lightbox-inner"><div class="lightbox-shimmer"></div><div class="lightbox-ring"></div><img src="' + escapeHtml(page.avatarUrl) + '" class="avatar-lightbox-img" id="lightboxImg" alt="Foto de ' + escapeHtml(name) + '" width="330" height="330" decoding="async" draggable="false"></div></div>'
+  const lightbox = imageUrl
+    ? '<div class="avatar-lightbox" id="avatarLightbox" role="dialog" aria-label="Foto de perfil ampliada"><div class="lightbox-inner"><div class="lightbox-shimmer"></div><div class="lightbox-ring"></div><img src="' + escapeHtml(imageUrl) + '" class="avatar-lightbox-img" id="lightboxImg" alt="Foto de ' + escapeHtml(name) + '" width="330" height="330" decoding="async" draggable="false"></div></div>'
     : '';
   return '<div class="legacy-profile-page' + darkClass + previewClass + '"' + colorStyle + '>'
     + '<main class="card">' + themeControl
