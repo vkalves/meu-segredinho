@@ -253,9 +253,9 @@ function defaultPage() {
     ...DEFAULTS,
     slug: base,
     profileName: state.user?.name || '',
-    title: 'Seu título aqui',
-    subtitle: 'Escreva uma frase para receber as pessoas que chegam pela sua bio.',
-    buttonLabel: 'ACESSE MEU LINK',
+    title: 'Ficou Curioso?',
+    subtitle: 'sim, eu tenho... vem ver meus conteúd0s que nao posto em nenhum outro lugar',
+    buttonLabel: 'MEU TLEGRAM',
     destinationUrl: '', avatarUrl: '', clicks: 0,
   };
 }
