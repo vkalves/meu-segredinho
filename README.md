@@ -48,7 +48,7 @@ Abra `http://localhost:3000/dashboard` para entrar ou `http://localhost:3000/reg
 ### Supabase
 
 - Em uma instalação nova, execute `supabase/schema.sql` no SQL Editor para criar a tabela, as políticas RLS, o bucket de imagens e as funções de contagem e redirecionamento. A leitura pública mantém acesso apenas aos campos exibidos na página.
-- Em uma instalação existente, aplique `supabase/migrations/20261105000000_country_destinations.sql` antes de publicar a nova versão. A migração adiciona as regras por país e mantém a função antiga disponível durante a atualização. O país é inferido pelo cabeçalho `x-vercel-ip-country`; o IP do visitante não é armazenado.
+- Em uma instalação existente, aplique `supabase/migrations/20261105082119_country_destinations.sql` antes de publicar a nova versão. A migração adiciona as regras por país e mantém a função antiga disponível durante a atualização. O país é inferido pelo cabeçalho `x-vercel-ip-country`; o IP do visitante não é armazenado.
 - Configure a URL do site como `https://privame.site` e permita os redirecionamentos `https://privame.site/auth/callback` e `http://localhost:3000/auth/callback`.
 - A confirmação de e-mail depende das configurações de Auth e do SMTP do projeto.
 
