@@ -1,0 +1,27 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "node scripts/build.mjs",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/dashboard", "destination": "/app-shell.html" },
+    { "source": "/login", "destination": "/app-shell.html" },
+    { "source": "/register", "destination": "/app-shell.html" },
+    { "source": "/create", "destination": "/app-shell.html" },
+    { "source": "/editor/:id", "destination": "/app-shell.html" },
+    { "source": "/auth/callback", "destination": "/app-shell.html" },
+    { "source": "/:slug", "destination": "/app-shell.html" }
+  ],
+  "headers": [
+    {
+      "source": "/app-shell.html",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self' data: https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+        },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}

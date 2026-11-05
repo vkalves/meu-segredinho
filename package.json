@@ -1,0 +1,14 @@
+{
+  "name": "privame-link-pages",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Páginas de links personalizadas para o domínio privame.site",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "build": "node scripts/build.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

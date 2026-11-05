@@ -1,0 +1,11 @@
+node_modules/
+data/db.json
+data/db.json.tmp
+.env
+.env.local
+.DS_Store
+
+/work/
+/outputs/
+/.vercel/
+/dist/

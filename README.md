@@ -18,3 +18,50 @@ Não mover, renomear ou excluir as pastas e os arquivos antigos sem revisar prim
 ## Privame
 
 Para publicar a agência como projeto separado, selecione privame como Root Directory. O dashboard fica em /dashboard/.
+
+## Privame Links
+
+Aplicação para criar páginas de links personalizadas em endereços como `https://privame.site/seunome`.
+
+### Funcionalidades
+
+- Cadastro e login por e-mail no Supabase Auth, com sessão em cookie HttpOnly.
+- Criação de várias páginas por conta, cada uma com seu próprio endereço.
+- Edição de nome, foto, título, subtítulo, botão, destino, selo, status, rodapé e cores.
+- Prévia ao vivo do layout baseado no HTML de referência.
+- Página pública responsiva, modo claro/escuro e redirecionamento animado.
+- Contagem atômica de cliques no botão.
+- Dados em Supabase Postgres, fotos em Supabase Storage e APIs como Vercel Functions.
+- As páginas e demais caminhos legados do repositório continuam atendidos.
+
+### Configuração local
+
+Requer Node.js 22 ou mais recente e as variáveis listadas em `.env.example`. O arquivo não contém valores secretos. Configure as variáveis no ambiente local sem adicioná-las ao Git.
+
+```powershell
+npm start
+```
+
+Abra `http://localhost:3000/dashboard` para entrar ou `http://localhost:3000/register` para criar uma conta. As páginas locais usam `http://localhost:3000/seunome`.
+
+### Supabase
+
+- Execute `supabase/schema.sql` no SQL Editor do projeto para criar a tabela, políticas RLS, bucket de imagens e a função de contagem. A leitura pública tem permissões apenas para os campos exibidos na página; uploads de fotos exigem sessão e ficam limitados à pasta da própria conta.
+- Configure a URL do site como `https://privame.site` e permita os redirecionamentos `https://privame.site/auth/callback` e `http://localhost:3000/auth/callback`.
+- A confirmação de e-mail depende das configurações de Auth e do SMTP do projeto.
+
+### Vercel
+
+- Importe o repositório e mantenha a raiz como Root Directory.
+- O `vercel.json` seleciona o preset Other, executa `node scripts/build.mjs` e publica `dist/`. O build inclui as páginas legadas junto com o novo painel.
+- Configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` e `PUBLIC_BASE_URL=https://privame.site` nas variáveis de produção. O backend usa a chave publicável com a sessão do usuário e as políticas RLS; não precisa de uma chave privilegiada do Supabase.
+- Conecte `privame.site` ao projeto Vercel. A aplicação usa rewrites para o painel e para URLs públicas de um segmento.
+- Para usar cadastro por e-mail em Preview, permita também a URL de callback daquele domínio nas Redirect URLs do Supabase.
+
+`vercel.json` contém as rotas do app e `api/[...path].mjs` encaminha as solicitações para as funções de backend. O `index.html` existente e as pastas independentes são preservados.
+
+### Observações
+
+- O slug aceita letras sem acento, números e hífen, de 3 a 30 caracteres.
+- Nenhuma chave privilegiada do Supabase é usada no cliente ou no servidor. RLS restringe cada conta às próprias páginas; campos públicos e uploads têm permissões explícitas e limitadas.
+- Não há recuperação de senha nesta primeira versão.
