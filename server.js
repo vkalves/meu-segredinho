@@ -32,7 +32,7 @@ function writeFile(res, file, { cache = 'no-cache', appShell = false } = {}) {
     'Cache-Control': cache,
     'X-Content-Type-Options': 'nosniff',
   };
-  if (appShell) headers['Content-Security-Policy'] = "default-src 'self' data: https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
+  if (appShell) headers['Content-Security-Policy'] = "default-src 'self' data: https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
   res.writeHead(200, headers);
   fs.createReadStream(file).pipe(res);
   return true;

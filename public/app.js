@@ -952,6 +952,11 @@ async function renderRoute() {
   const pathname = decodeURIComponent(window.location.pathname.replace(/\/$/, '') || '/');
   const route = pathname === '/' ? '/' : pathname;
   if (route === '/auth/callback') return finishAuthCallback();
+  const shortGoMatch = route.match(/^\/go\/([a-z0-9-]{1,30})$/i);
+  if (shortGoMatch) {
+    window.location.replace(`/api/go/${encodeURIComponent(shortGoMatch[1].toLowerCase())}`);
+    return;
+  }
   if (/^\/api(?:\/|$)/.test(route) || /^\/go(?:\/|$)/.test(route)) return;
   if (/^\/[a-z0-9-]{1,30}$/i.test(route) && !['/login', '/register', '/dashboard', '/create'].includes(route.toLowerCase())) {
     return renderPublicSlug(route.slice(1).toLowerCase());
