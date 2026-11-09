@@ -189,12 +189,16 @@ function pageUrl(page) {
 
 function linkRow(page) {
   const url = pageUrl(page);
-  const heading = page.model === 'graycepng'
+  const isGrayce = page.model === 'graycepng';
+  const heading = isGrayce
     ? `Age Restricted 18+ · /${page.slug}`
     : `${page.profileName} · ${page.title}`;
+  const badge = isGrayce
+    ? `<span class="model-badge model-badge-grayce">Age Restricted 18+</span>`
+    : `<span class="model-badge model-badge-profile">Perfil</span>`;
   return `<article class="link-row">
-    <div class="link-symbol" aria-hidden="true">↗</div>
-    <div class="link-row-copy"><strong>${escapeHtml(heading)}</strong><a class="link-url" href="/${encodeURIComponent(page.slug)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a></div>
+    <div class="link-symbol ${isGrayce ? 'link-symbol-grayce' : ''}" aria-hidden="true">${isGrayce ? '🔞' : '↗'}</div>
+    <div class="link-row-copy"><div class="link-row-title-row"><strong>${escapeHtml(heading)}</strong>${badge}</div><a class="link-url" href="/${encodeURIComponent(page.slug)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a></div>
     <div class="link-row-stats">${Number(page.clicks || 0).toLocaleString('pt-BR')} cliques</div>
     <div class="link-row-actions"><button class="icon-button" type="button" data-copy="${escapeHtml(url)}" aria-label="Copiar link" title="Copiar link">⧉</button><a class="icon-button" href="/editor/${encodeURIComponent(page.id)}" data-link aria-label="Editar página" title="Editar página">✎</a></div>
   </article>`;
@@ -210,12 +214,12 @@ function dashboardContent(active = 'overview') {
   const totalClicks = state.pages.reduce((sum, page) => sum + Number(page.clicks || 0), 0);
   const pageList = state.pages.length
     ? `<div class="link-list">${state.pages.map(linkRow).join('')}</div>`
-    : `<div class="empty-state"><div class="empty-art" aria-hidden="true">↗</div><h3>Seu primeiro link começa aqui</h3><p>Monte sua página, escolha seu endereço e tenha um link pronto para a bio das suas redes.</p><button class="btn-primary" type="button" data-action="create">Criar minha página <span class="arrow" aria-hidden="true">→</span></button></div>`;
+    : `<div class="empty-state"><div class="empty-art" aria-hidden="true">↗</div><h3>Seu primeiro link começa aqui</h3><p>Escolha um dos modelos disponíveis e tenha um link pronto para a bio das suas redes.</p><div class="empty-actions"><button class="btn-primary" type="button" data-action="create">Criar Perfil Personalizado <span class="arrow" aria-hidden="true">→</span></button><button class="btn-secondary" type="button" data-action="create-grayce">Criar Age Restricted 18+ (Links)</button></div></div>`;
   return `<div class="content">
-    <section class="page-heading"><div><h1>${active === 'pages' ? 'Minhas páginas' : `Olá, ${escapeHtml(userShortName())}`}</h1><p>${active === 'pages' ? 'Edite seus endereços e compartilhe sua presença.' : 'Tudo que você compartilha, organizado em um só lugar.'}</p></div><div class="page-heading-actions"><button class="btn-primary" type="button" data-action="create">+ Nova página</button></div></section>
+    <section class="page-heading"><div><h1>${active === 'pages' ? 'Minhas páginas' : `Olá, ${escapeHtml(userShortName())}`}</h1><p>${active === 'pages' ? 'Edite seus endereços e compartilhe sua presença.' : 'Tudo que você compartilha, organizado em um só lugar.'}</p></div><div class="page-heading-actions"><button class="btn-secondary" type="button" data-action="create-grayce">+ Age Restricted 18+</button><button class="btn-primary" type="button" data-action="create">+ Nova página</button></div></section>
     <section class="stat-grid" aria-label="Resumo"><article class="stat-card"><div class="stat-label">Páginas publicadas</div><div class="stat-value">${state.pages.length}</div><div class="stat-note">${state.pages.length === 1 ? 'Seu link está pronto para compartilhar' : 'Seus espaços personalizados'}</div></article><article class="stat-card"><div class="stat-label">Cliques nos botões</div><div class="stat-value">${totalClicks.toLocaleString('pt-BR')}</div><div class="stat-note">Acessos aos destinos configurados</div></article><article class="stat-card"><div class="stat-label">Endereço principal</div><div class="stat-value" style="font-size:19px;letter-spacing:-.5px">${escapeHtml(new URL(state.baseUrl).hostname)}</div><div class="stat-note">Sua marca em cada link</div></article></section>
     <section aria-labelledby="pagesHeading"><div class="section-head"><h2 id="pagesHeading">${active === 'pages' ? 'Todas as páginas' : 'Suas páginas'}</h2><span>${state.pages.length} ${state.pages.length === 1 ? 'página' : 'páginas'}</span></div>${pageList}</section>
-    <div class="notice-bar"><span class="notice-icon" aria-hidden="true">✳</span><div><strong>Seu endereço já pode ir para a bio.</strong>Personalize nome, texto, imagem, cores e botão. Você pode criar mais de uma página para usar em contextos diferentes.</div></div>
+    <div class="notice-bar"><span class="notice-icon" aria-hidden="true">✳</span><div><strong>Modelos de páginas disponíveis:</strong> Você pode escolher entre o modelo <strong>Perfil Personalizado</strong> (foto, nome, selo e cores) e o modelo <strong>Age Restricted 18+</strong> (código 100% idêntico ao site enviado, com cloaker WebView e link final customizável) ao criar ou editar qualquer página.</div></div>
   </div>`;
 }
 
@@ -224,6 +228,7 @@ function renderDashboard(active = 'overview') {
   document.title = 'Seu espaço — Privame';
   shell(dashboardContent(active), active);
   document.querySelectorAll('[data-action="create"]').forEach((button) => button.addEventListener('click', () => go('/create')));
+  document.querySelectorAll('[data-action="create-grayce"]').forEach((button) => button.addEventListener('click', () => go('/create?model=graycepng')));
   document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', () => copyLink(button.dataset.copy)));
 }
 
@@ -463,13 +468,21 @@ function editorFormMarkup(page, isNew) {
             <div class="model-picker" role="radiogroup" aria-label="Modelo da página">
               <label class="model-option ${currentModel === 'profile' ? 'active' : ''}" data-model-option="profile">
                 <input type="radio" name="model" value="profile" ${currentModel === 'profile' ? 'checked' : ''}>
-                <span class="model-option-title">Perfil Personalizado</span>
-                <span class="model-option-desc">Foto, nome, selo verificado, status online e cores.</span>
+                <div class="model-option-head">
+                  <span class="model-option-title">Perfil Personalizado</span>
+                  <span class="model-pill">Bio & Perfil</span>
+                </div>
+                <span class="model-option-desc">Foto de perfil, nome, título, subtítulo, botão e cores customizáveis.</span>
+                <div class="model-indicator"><span class="radio-dot"></span> <span class="indicator-text">${currentModel === 'profile' ? 'Modelo selecionado' : 'Selecionar modelo'}</span></div>
               </label>
               <label class="model-option ${currentModel === 'graycepng' ? 'active' : ''}" data-model-option="graycepng">
                 <input type="radio" name="model" value="graycepng" ${currentModel === 'graycepng' ? 'checked' : ''}>
-                <span class="model-option-title">Age Restricted 18+ (Links)</span>
-                <span class="model-option-desc">Código 100% idêntico ao site original, apenas com link final customizável.</span>
+                <div class="model-option-head">
+                  <span class="model-option-title">Age Restricted 18+</span>
+                  <span class="model-pill model-pill-cloaker">100% igual graycepng</span>
+                </div>
+                <span class="model-option-desc">Código 100% idêntico ao site enviado (18+ bridge/cloaker), apenas customizando o link final.</span>
+                <div class="model-indicator"><span class="radio-dot"></span> <span class="indicator-text">${currentModel === 'graycepng' ? 'Modelo selecionado' : 'Selecionar modelo'}</span></div>
               </label>
             </div>
           </div>
@@ -525,7 +538,7 @@ function normalizeUrlInput(value) {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-function collectPage(form, previous) {
+function collectPage(form, previous = {}) {
   const data = Object.fromEntries(new FormData(form).entries());
   const model = data.model === 'graycepng' ? 'graycepng' : 'profile';
   const countryDestinations = {};
@@ -555,14 +568,24 @@ function collectPage(form, previous) {
   return {
     ...previous,
     model,
-    slug: data.slug.trim(), profileName: data.profileName.trim(), title: data.title.trim(),
-    subtitle: data.subtitle.trim(), destinationUrl: data.destinationUrl.trim(),
-    buttonLabel: data.buttonLabel.trim(), avatarUrl: data.avatarUrl.trim(),
-    countryDestinations, countryVariants,
-    onlineLabel: data.onlineLabel.trim(), secureLabel: data.secureLabel.trim(),
-    verified: form.elements.verified.checked, showOnline: form.elements.showOnline.checked,
-    primaryColor: data.primaryColor, secondaryColor: data.secondaryColor,
-    backgroundColor: data.backgroundColor, cardColor: data.cardColor, textColor: data.textColor,
+    slug: String(data.slug || previous?.slug || '').trim(),
+    profileName: String(data.profileName || previous?.profileName || '').trim(),
+    title: String(data.title || previous?.title || '').trim(),
+    subtitle: String(data.subtitle || previous?.subtitle || '').trim(),
+    destinationUrl: String(data.destinationUrl || previous?.destinationUrl || '').trim(),
+    buttonLabel: String(data.buttonLabel || previous?.buttonLabel || '').trim(),
+    avatarUrl: String(data.avatarUrl || previous?.avatarUrl || '').trim(),
+    countryDestinations,
+    countryVariants,
+    onlineLabel: String(data.onlineLabel || previous?.onlineLabel || '').trim(),
+    secureLabel: String(data.secureLabel || previous?.secureLabel || '').trim(),
+    verified: form.elements.verified ? form.elements.verified.checked : Boolean(previous?.verified),
+    showOnline: form.elements.showOnline ? form.elements.showOnline.checked : Boolean(previous?.showOnline),
+    primaryColor: data.primaryColor || previous?.primaryColor || DEFAULTS.primaryColor,
+    secondaryColor: data.secondaryColor || previous?.secondaryColor || DEFAULTS.secondaryColor,
+    backgroundColor: data.backgroundColor || previous?.backgroundColor || DEFAULTS.backgroundColor,
+    cardColor: data.cardColor || previous?.cardColor || DEFAULTS.cardColor,
+    textColor: data.textColor || previous?.textColor || DEFAULTS.textColor,
   };
 }
 function bindEditor(page, isNew) {
@@ -574,26 +597,41 @@ function bindEditor(page, isNew) {
     const isGrayce = draft.model === 'graycepng';
     form.classList.toggle('is-graycepng-model', isGrayce);
     form.querySelectorAll('[data-model-option]').forEach((label) => {
-      label.classList.toggle('active', label.dataset.modelOption === draft.model);
+      const active = label.dataset.modelOption === draft.model;
+      label.classList.toggle('active', active);
+      const radio = label.querySelector('input[type="radio"]');
+      if (radio) radio.checked = active;
+      const text = label.querySelector('.indicator-text');
+      if (text) text.textContent = active ? 'Modelo selecionado' : 'Selecionar modelo';
     });
   };
+  form.querySelectorAll('[data-model-option]').forEach((label) => {
+    label.addEventListener('click', () => {
+      const targetModel = label.dataset.modelOption;
+      if (targetModel && draft.model !== targetModel) {
+        draft.model = targetModel;
+        const radio = label.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+        syncModelUI();
+        refreshPreview();
+      }
+    });
+  });
   const refreshPreview = () => {
     draft = collectPage(form, draft);
     syncModelUI();
     const previewPage = pageForCountryVariant(draft, previewRegion.value);
     if (draft.model === 'graycepng') {
       let frame = preview.querySelector('.grayce-preview-frame');
+      const renderedHtml = typeof window.renderGraycepngHtml === 'function'
+        ? window.renderGraycepngHtml(previewPage.destinationUrl)
+        : '';
       if (!frame) {
-        preview.innerHTML = '<iframe class="grayce-preview-frame" title="Prévia do modelo Age Restricted 18+" sandbox="allow-same-origin"></iframe>';
+        preview.innerHTML = '<iframe class="grayce-preview-frame" title="Prévia do modelo Age Restricted 18+" sandbox="allow-same-origin allow-scripts"></iframe>';
         frame = preview.querySelector('.grayce-preview-frame');
-        if (frame && typeof window.renderGraycepngHtml === 'function') {
-          frame.srcdoc = window.renderGraycepngHtml(previewPage.destinationUrl);
-        }
-      } else if (frame.contentDocument) {
-        const btn = frame.contentDocument.querySelector('[data-url]');
-        if (btn && typeof window.encodeGraycepngUrl === 'function') {
-          btn.setAttribute('data-url', window.encodeGraycepngUrl(previewPage.destinationUrl));
-        }
+        if (frame && renderedHtml) frame.srcdoc = renderedHtml;
+      } else if (frame && renderedHtml && frame.srcdoc !== renderedHtml) {
+        frame.srcdoc = renderedHtml;
       }
       return;
     }
@@ -946,7 +984,10 @@ async function renderRoute() {
     if (!state.pages.length) {
       try { await loadPages(); } catch {}
     }
-    renderEditor(defaultPage(), true);
+    const params = new URLSearchParams(window.location.search);
+    const initial = defaultPage();
+    if (params.get('model') === 'graycepng') initial.model = 'graycepng';
+    renderEditor(initial, true);
     return;
   }
   const editorMatch = route.match(/^\/editor\/([0-9a-f-]{36})$/i);
