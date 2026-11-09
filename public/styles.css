@@ -213,6 +213,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .preview-head span { color: #99a199; font-size: 10px; }
 .preview-stage { min-height: 590px; display: grid; place-items: center; padding: 25px 16px; overflow: hidden; border-radius: 10px; background: radial-gradient(ellipse at 50% 5%, #fff 0, #f3f5f1 100%); }
 .preview-device { width: min(100%, 342px); }
+.field-label { display: block; margin-bottom: 6px; color: #545f57; font-size: 10px; font-weight: 600; }
+.model-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.model-option { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 12px 13px; border: 1.5px solid #dfe4dd; border-radius: 11px; background: #fcfdfb; cursor: pointer; transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+.model-option:hover { border-color: #b7c4bc; }
+.model-option.active { border-color: #3c6551; background: #f2f7f3; box-shadow: 0 0 0 3px rgba(60, 101, 81, .1); }
+.model-option input { position: absolute; opacity: 0; pointer-events: none; }
+.model-option-title { color: #1f2d26; font: 700 12px Manrope, sans-serif; }
+.model-option-desc { color: #78837c; font-size: 10px; line-height: 1.45; }
+.profile-only-block, .country-variant-profile-only { display: contents; }
+.country-variant-dest-wrap { grid-column: 1 / -1; }
+.editor-form.is-graycepng-model [data-profile-only] { display: none !important; }
+.grayce-preview-frame { width: 100%; height: 530px; border: 0; border-radius: 18px; background: #f5f7fa; box-shadow: 0 14px 36px rgba(0,0,0,.09); }
+@media (max-width: 480px) {
+  .model-picker { grid-template-columns: 1fr; }
+}
 
 /* Public page, based on the supplied profile-page HTML. */
 .public-page { --public-primary: #2aabee; --public-secondary: #229ed9; --public-bg: #eaf6fd; --public-card: #fff; --public-text: #343434; --public-muted: #555; --public-soft: #888; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 23px; background: linear-gradient(135deg, var(--public-bg), #fcfcfc); transition: background .3s ease; }

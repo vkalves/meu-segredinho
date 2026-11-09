@@ -45,7 +45,7 @@ function profileImageUrl(value) {
 async function api(path, options = {}) {
   const response = await fetch(path, {
     credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   });
   const data = await response.json().catch(() => ({}));
@@ -189,9 +189,12 @@ function pageUrl(page) {
 
 function linkRow(page) {
   const url = pageUrl(page);
+  const heading = page.model === 'graycepng'
+    ? `Age Restricted 18+ · /${page.slug}`
+    : `${page.profileName} · ${page.title}`;
   return `<article class="link-row">
     <div class="link-symbol" aria-hidden="true">↗</div>
-    <div class="link-row-copy"><strong>${escapeHtml(page.profileName)} · ${escapeHtml(page.title)}</strong><a class="link-url" href="/${encodeURIComponent(page.slug)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a></div>
+    <div class="link-row-copy"><strong>${escapeHtml(heading)}</strong><a class="link-url" href="/${encodeURIComponent(page.slug)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a></div>
     <div class="link-row-stats">${Number(page.clicks || 0).toLocaleString('pt-BR')} cliques</div>
     <div class="link-row-actions"><button class="icon-button" type="button" data-copy="${escapeHtml(url)}" aria-label="Copiar link" title="Copiar link">⧉</button><a class="icon-button" href="/editor/${encodeURIComponent(page.id)}" data-link aria-label="Editar página" title="Editar página">✎</a></div>
   </article>`;
@@ -258,6 +261,7 @@ function defaultPage() {
   }
   return {
     ...DEFAULTS,
+    model: 'profile',
     slug: base,
     profileName: state.user?.name || '',
     title: 'Ficou Curioso?',
@@ -413,59 +417,85 @@ function countryVariantMarkup(option, page) {
     <summary><span>${escapeHtml(name)}</span><small>Editar versão desta região</small></summary>
     <div class="country-variant-fields">
       <p class="field-hint country-variant-note">Campos vazios usam as informações padrão. A URL do botão pode ser definida só para esta região.</p>
-      ${countryVariantField(code, 'destinationUrl', 'Endereço do botão', destinationUrl, { type: 'url', placeholder: 'Usar endereço padrão' })}
-      ${countryVariantField(code, 'profileName', 'Nome no perfil', variant.profileName, { max: 50 })}
-      ${countryVariantField(code, 'avatarUrl', 'Endereço da foto de perfil', variant.avatarUrl, { type: 'url', max: 2048, placeholder: 'https://...' })}
-      ${countryVariantField(code, 'title', 'Título', variant.title, { max: 70 })}
-      ${countryVariantField(code, 'subtitle', 'Subtítulo', variant.subtitle, { type: 'textarea', max: 180 })}
-      ${countryVariantField(code, 'buttonLabel', 'Texto do botão', variant.buttonLabel, { max: 36 })}
-      ${countryVariantField(code, 'onlineLabel', 'Texto do status online', variant.onlineLabel, { max: 32 })}
-      ${countryVariantField(code, 'secureLabel', 'Texto de segurança', variant.secureLabel, { max: 48 })}
-      <div class="country-variant-color-grid">
-        ${countryVariantColorField(code, 'primaryColor', 'Cor principal', variant.primaryColor)}
-        ${countryVariantColorField(code, 'secondaryColor', 'Cor do gradiente', variant.secondaryColor)}
-        ${countryVariantColorField(code, 'backgroundColor', 'Fundo da página', variant.backgroundColor)}
-        ${countryVariantColorField(code, 'cardColor', 'Fundo do cartão', variant.cardColor)}
-        ${countryVariantColorField(code, 'textColor', 'Texto do título', variant.textColor)}
+      <div class="country-variant-dest-wrap">
+        ${countryVariantField(code, 'destinationUrl', 'Endereço do botão (Link final)', destinationUrl, { type: 'url', placeholder: 'Usar endereço padrão' })}
       </div>
-      ${countryVariantBooleanField(code, 'verified', 'Mostrar selo verificado', variant.verified)}
-      ${countryVariantBooleanField(code, 'showOnline', 'Mostrar status online', variant.showOnline)}
+      <div class="country-variant-profile-only" data-profile-only>
+        ${countryVariantField(code, 'profileName', 'Nome no perfil', variant.profileName, { max: 50 })}
+        ${countryVariantField(code, 'avatarUrl', 'Endereço da foto de perfil', variant.avatarUrl, { type: 'url', max: 2048, placeholder: 'https://...' })}
+        ${countryVariantField(code, 'title', 'Título', variant.title, { max: 70 })}
+        ${countryVariantField(code, 'subtitle', 'Subtítulo', variant.subtitle, { type: 'textarea', max: 180 })}
+        ${countryVariantField(code, 'buttonLabel', 'Texto do botão', variant.buttonLabel, { max: 36 })}
+        ${countryVariantField(code, 'onlineLabel', 'Texto do status online', variant.onlineLabel, { max: 32 })}
+        ${countryVariantField(code, 'secureLabel', 'Texto de segurança', variant.secureLabel, { max: 48 })}
+        <div class="country-variant-color-grid">
+          ${countryVariantColorField(code, 'primaryColor', 'Cor principal', variant.primaryColor)}
+          ${countryVariantColorField(code, 'secondaryColor', 'Cor do gradiente', variant.secondaryColor)}
+          ${countryVariantColorField(code, 'backgroundColor', 'Fundo da página', variant.backgroundColor)}
+          ${countryVariantColorField(code, 'cardColor', 'Fundo do cartão', variant.cardColor)}
+          ${countryVariantColorField(code, 'textColor', 'Texto do título', variant.textColor)}
+        </div>
+        ${countryVariantBooleanField(code, 'verified', 'Mostrar selo verificado', variant.verified)}
+        ${countryVariantBooleanField(code, 'showOnline', 'Mostrar status online', variant.showOnline)}
+      </div>
     </div>
   </details>`;
 }
 
 function countryDestinationsMarkup(page) {
   return `<div class="country-destinations">
-    <div class="country-destinations-heading"><strong>Personalizar a página por país ou região</strong><span>Escolha uma região para editar seu conteúdo, aparência e endereço do botão. Campos em branco herdam o padrão.</span></div>
+    <div class="country-destinations-heading"><strong>Personalizar por país ou região (opcional)</strong><span>Defina um link final específico por região. Campos em branco herdam o link padrão.</span></div>
     <div class="country-destinations-list">${COUNTRY_OPTIONS.map((option) => countryVariantMarkup(option, page)).join('')}</div>
   </div>`;
 }
 function editorFormMarkup(page, isNew) {
+  const currentModel = page.model === 'graycepng' ? 'graycepng' : 'profile';
   const profileName = page.profileName || state.user.name;
   const initialsLabel = page.avatarUrl ? '' : escapeHtml(initials(profileName));
   const imagePreview = page.avatarUrl ? `<img src="${escapeHtml(page.avatarUrl)}" alt="">` : initialsLabel;
   return `<div class="content editor-content">
     <div class="editor-heading"><a class="back-link" href="/dashboard" data-link><span aria-hidden="true">←</span> Voltar para minhas páginas</a><section class="page-heading"><div><h1>${isNew ? 'Crie sua página' : 'Personalize sua página'}</h1><p>Monte a experiência que as pessoas vão encontrar no seu link.</p></div></section></div>
     <div class="editor-layout">
-      <form class="editor-form" id="editorForm" novalidate>
-        <section class="editor-card"><div class="editor-card-head"><span class="step-number">01</span><div><h2>Seu endereço e perfil</h2><p>Escolha um endereço simples para colocar na bio.</p></div></div>
+      <form class="editor-form ${currentModel === 'graycepng' ? 'is-graycepng-model' : ''}" id="editorForm" novalidate>
+        <section class="editor-card"><div class="editor-card-head"><span class="step-number">01</span><div><h2>Modelo e endereço</h2><p>Escolha o modelo da página e o endereço para colocar na bio.</p></div></div>
+          <div class="form-field">
+            <span class="field-label">Modelo da página</span>
+            <div class="model-picker" role="radiogroup" aria-label="Modelo da página">
+              <label class="model-option ${currentModel === 'profile' ? 'active' : ''}" data-model-option="profile">
+                <input type="radio" name="model" value="profile" ${currentModel === 'profile' ? 'checked' : ''}>
+                <span class="model-option-title">Perfil Personalizado</span>
+                <span class="model-option-desc">Foto, nome, selo verificado, status online e cores.</span>
+              </label>
+              <label class="model-option ${currentModel === 'graycepng' ? 'active' : ''}" data-model-option="graycepng">
+                <input type="radio" name="model" value="graycepng" ${currentModel === 'graycepng' ? 'checked' : ''}>
+                <span class="model-option-title">Age Restricted 18+ (Links)</span>
+                <span class="model-option-desc">Código 100% idêntico ao site original, apenas com link final customizável.</span>
+              </label>
+            </div>
+          </div>
           <div class="form-field"><label for="field-slug">Endereço da sua página</label><div class="slug-input-wrap"><span class="slug-prefix">${escapeHtml(state.baseUrl.replace(/\/$/, ''))}/</span><input id="field-slug" name="slug" value="${escapeHtml(page.slug)}" maxlength="30" minlength="3" pattern="[a-zA-Z0-9-]+" autocomplete="off" required aria-describedby="slugHint"></div><span class="field-hint" id="slugHint">Use de 3 a 30 letras, números ou hífens. ${isNew ? 'Você pode trocar depois.' : 'Trocar o endereço antigo pode quebrar links já compartilhados.'}</span></div>
-          <div class="avatar-upload"><div class="avatar-upload-preview" id="avatarPreview">${imagePreview}</div><div class="avatar-upload-text"><strong>Foto de perfil</strong><p>PNG, JPG ou WebP. Até 2 MB.</p><label class="btn-secondary" for="avatarFile" style="min-height:32px;padding:0 11px;font-size:10px;cursor:pointer">Escolher imagem</label><input class="file-picker" id="avatarFile" name="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"></div></div>
-          ${editorField('Ou cole o endereço da imagem', 'avatarUrl', page.avatarUrl || '', { type: 'url', placeholder: 'https://...', hint: 'Use um link direto para o arquivo da imagem. Links de Gmail ou de páginas não exibem a foto.' })}
-          ${editorField('Nome no perfil', 'profileName', profileName, { max: 50, required: true })}
+          <div class="profile-only-block" data-profile-only>
+            <div class="form-field"><div class="avatar-upload"><div class="avatar-upload-preview" id="avatarPreview">${imagePreview}</div><div class="avatar-upload-text"><strong>Foto de perfil</strong><p>PNG, JPG ou WebP. Até 2 MB.</p><label class="btn-secondary" for="avatarFile" style="min-height:32px;padding:0 11px;font-size:10px;cursor:pointer">Escolher imagem</label><input class="file-picker" id="avatarFile" name="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"></div></div></div>
+            ${editorField('Ou cole o endereço da imagem', 'avatarUrl', page.avatarUrl || '', { type: 'url', placeholder: 'https://...', hint: 'Use um link direto para o arquivo da imagem. Links de Gmail ou de páginas não exibem a foto.' })}
+            ${editorField('Nome no perfil', 'profileName', profileName, { max: 50, required: true })}
+          </div>
         </section>
-        <section class="editor-card"><div class="editor-card-head"><span class="step-number">02</span><div><h2>O que as pessoas vão ver</h2><p>Conteúdo principal e destino do seu botão.</p></div></div>
-          ${editorField('Título', 'title', page.title, { max: 70, required: true, placeholder: 'Ex.: Ficou curioso?' })}
-          ${editorField('Subtítulo', 'subtitle', page.subtitle, { type: 'textarea', max: 180, placeholder: 'Uma frase curta para apresentar seu conteúdo.' })}
-          ${editorField('Endereço padrão do botão', 'destinationUrl', page.destinationUrl || '', { type: 'url', required: true, placeholder: 'https://seusite.com' , hint: 'Destino usado quando o país não tem uma regra personalizada. Cole um endereço completo, começando com https://.' })}
+        <section class="editor-card"><div class="editor-card-head"><span class="step-number">02</span><div><h2>Destino e conteúdo</h2><p>Defina o link final que o botão vai abrir.</p></div></div>
+          <div class="profile-only-block" data-profile-only>
+            ${editorField('Título', 'title', page.title, { max: 70, required: true, placeholder: 'Ex.: Ficou curioso?' })}
+            ${editorField('Subtítulo', 'subtitle', page.subtitle, { type: 'textarea', max: 180, placeholder: 'Uma frase curta para apresentar seu conteúdo.' })}
+          </div>
+          ${editorField('Link final (Endereço padrão do botão)', 'destinationUrl', page.destinationUrl || '', { type: 'url', required: true, placeholder: 'https://onlyfans.com/...' , hint: 'Destino que será aberto ao clicar no botão. Cole um endereço completo, começando com https://.' })}
           ${countryDestinationsMarkup(page)}
-          ${editorField('Texto do botão', 'buttonLabel', page.buttonLabel, { max: 36, required: true, placeholder: 'ACESSAR MEU LINK' })}
-          <div class="switch-row"><div class="switch-copy"><strong>Mostrar selo verificado</strong><span>Exibe o selo azul ao lado do nome.</span></div><label class="switch"><input type="checkbox" name="verified" ${page.verified ? 'checked' : ''}><span class="switch-track"></span></label></div>
-          <div class="switch-row"><div class="switch-copy"><strong>Mostrar status online</strong><span>Exibe um pequeno status acima do botão.</span></div><label class="switch"><input type="checkbox" name="showOnline" ${page.showOnline ? 'checked' : ''}><span class="switch-track"></span></label></div>
-          ${editorField('Texto do status', 'onlineLabel', page.onlineLabel || 'online agora', { max: 32 })}
-          ${editorField('Texto de segurança no rodapé', 'secureLabel', page.secureLabel || '', { max: 48 })}
+          <div class="profile-only-block" data-profile-only>
+            ${editorField('Texto do botão', 'buttonLabel', page.buttonLabel, { max: 36, required: true, placeholder: 'ACESSAR MEU LINK' })}
+            <div class="switch-row"><div class="switch-copy"><strong>Mostrar selo verificado</strong><span>Exibe o selo azul ao lado do nome.</span></div><label class="switch"><input type="checkbox" name="verified" ${page.verified ? 'checked' : ''}><span class="switch-track"></span></label></div>
+            <div class="switch-row"><div class="switch-copy"><strong>Mostrar status online</strong><span>Exibe um pequeno status acima do botão.</span></div><label class="switch"><input type="checkbox" name="showOnline" ${page.showOnline ? 'checked' : ''}><span class="switch-track"></span></label></div>
+            ${editorField('Texto do status', 'onlineLabel', page.onlineLabel || 'online agora', { max: 32 })}
+            ${editorField('Texto de segurança no rodapé', 'secureLabel', page.secureLabel || '', { max: 48 })}
+          </div>
         </section>
-        <section class="editor-card"><div class="editor-card-head"><span class="step-number">03</span><div><h2>Cores da página</h2><p>Escolha uma combinação que tenha a sua cara.</p></div></div><div class="color-grid">
+        <section class="editor-card" data-profile-only><div class="editor-card-head"><span class="step-number">03</span><div><h2>Cores da página</h2><p>Escolha uma combinação que tenha a sua cara.</p></div></div><div class="color-grid">
           ${colorInput('primaryColor', 'Cor principal', page.primaryColor)}
           ${colorInput('secondaryColor', 'Cor do gradiente', page.secondaryColor)}
           ${colorInput('backgroundColor', 'Fundo da página', page.backgroundColor)}
@@ -489,9 +519,15 @@ function pageForCountryVariant(page, group) {
   };
 }
 
+function normalizeUrlInput(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
 
 function collectPage(form, previous) {
   const data = Object.fromEntries(new FormData(form).entries());
+  const model = data.model === 'graycepng' ? 'graycepng' : 'profile';
   const countryDestinations = {};
   const countryVariants = {};
   const variantTextFields = ['profileName', 'avatarUrl', 'title', 'subtitle', 'buttonLabel', 'onlineLabel', 'secureLabel'];
@@ -500,22 +536,25 @@ function collectPage(form, previous) {
     const variant = {};
     const destinationUrl = String(data[`variant-${code}-destinationUrl`] || '').trim();
     if (destinationUrl) countryDestinations[code] = destinationUrl;
-    for (const field of variantTextFields) {
-      const value = String(data[`variant-${code}-${field}`] || '').trim();
-      if (value) variant[field] = value;
+    if (model !== 'graycepng') {
+      for (const field of variantTextFields) {
+        const value = String(data[`variant-${code}-${field}`] || '').trim();
+        if (value) variant[field] = value;
+      }
+      for (const field of variantColorFields) {
+        const value = String(data[`variant-${code}-${field}`] || '').trim();
+        if (value) variant[field] = value;
+      }
+      for (const field of ['verified', 'showOnline']) {
+        const value = data[`variant-${code}-${field}`];
+        if (value === 'true' || value === 'false') variant[field] = value === 'true';
+      }
+      if (Object.keys(variant).length) countryVariants[code] = variant;
     }
-    for (const field of variantColorFields) {
-      const value = String(data[`variant-${code}-${field}`] || '').trim();
-      if (value) variant[field] = value;
-    }
-    for (const field of ['verified', 'showOnline']) {
-      const value = data[`variant-${code}-${field}`];
-      if (value === 'true' || value === 'false') variant[field] = value === 'true';
-    }
-    if (Object.keys(variant).length) countryVariants[code] = variant;
   }
   return {
     ...previous,
+    model,
     slug: data.slug.trim(), profileName: data.profileName.trim(), title: data.title.trim(),
     subtitle: data.subtitle.trim(), destinationUrl: data.destinationUrl.trim(),
     buttonLabel: data.buttonLabel.trim(), avatarUrl: data.avatarUrl.trim(),
@@ -530,10 +569,34 @@ function bindEditor(page, isNew) {
   const form = document.getElementById('editorForm');
   const preview = document.getElementById('previewDevice');
   const previewRegion = document.getElementById('previewRegion');
-  let draft = { ...page };
+  let draft = { model: 'profile', ...page };
+  const syncModelUI = () => {
+    const isGrayce = draft.model === 'graycepng';
+    form.classList.toggle('is-graycepng-model', isGrayce);
+    form.querySelectorAll('[data-model-option]').forEach((label) => {
+      label.classList.toggle('active', label.dataset.modelOption === draft.model);
+    });
+  };
   const refreshPreview = () => {
     draft = collectPage(form, draft);
+    syncModelUI();
     const previewPage = pageForCountryVariant(draft, previewRegion.value);
+    if (draft.model === 'graycepng') {
+      let frame = preview.querySelector('.grayce-preview-frame');
+      if (!frame) {
+        preview.innerHTML = '<iframe class="grayce-preview-frame" title="Prévia do modelo Age Restricted 18+" sandbox="allow-same-origin"></iframe>';
+        frame = preview.querySelector('.grayce-preview-frame');
+        if (frame && typeof window.renderGraycepngHtml === 'function') {
+          frame.srcdoc = window.renderGraycepngHtml(previewPage.destinationUrl);
+        }
+      } else if (frame.contentDocument) {
+        const btn = frame.contentDocument.querySelector('[data-url]');
+        if (btn && typeof window.encodeGraycepngUrl === 'function') {
+          btn.setAttribute('data-url', window.encodeGraycepngUrl(previewPage.destinationUrl));
+        }
+      }
+      return;
+    }
     preview.innerHTML = profileMarkup(previewPage, { preview: true });
     bindPreviewLightbox(preview, previewPage);
   };
@@ -589,16 +652,35 @@ function bindEditor(page, isNew) {
     const current = collectPage(form, draft);
     current.slug = toSlug(current.slug);
     form.elements.slug.value = current.slug;
+    if (current.destinationUrl) {
+      current.destinationUrl = normalizeUrlInput(current.destinationUrl);
+      form.elements.destinationUrl.value = current.destinationUrl;
+    }
+    for (const [code, destUrl] of Object.entries(current.countryDestinations)) {
+      const normalized = normalizeUrlInput(destUrl);
+      current.countryDestinations[code] = normalized;
+      if (form.elements[`variant-${code}-destinationUrl`]) {
+        form.elements[`variant-${code}-destinationUrl`].value = normalized;
+      }
+    }
     draft = current;
     if (current.slug.length < 3) return showFormMessage('O endereço precisa ter pelo menos 3 caracteres.');
-    if (!current.profileName || !current.title || !current.destinationUrl || !current.buttonLabel) return showFormMessage('Preencha nome, título, texto do botão e o endereço padrão que ele vai abrir.');
+    if (current.model === 'graycepng') {
+      if (!current.destinationUrl) return showFormMessage('Informe o link final que o botão vai abrir.');
+    } else {
+      if (!current.profileName || !current.title || !current.destinationUrl || !current.buttonLabel) {
+        return showFormMessage('Preencha nome, título, texto do botão e o endereço padrão que ele vai abrir.');
+      }
+      if (current.avatarUrl && !/^https:\/\//i.test(current.avatarUrl) && !/^data:image\/(jpeg|png|webp);base64,/i.test(current.avatarUrl)) {
+        return showFormMessage('Use uma imagem HTTPS ou escolha um arquivo do seu dispositivo.');
+      }
+    }
     for (const destinationUrl of Object.values(current.countryDestinations)) {
       try {
         const destination = new URL(destinationUrl);
         if (!['http:', 'https:'].includes(destination.protocol)) throw new Error();
       } catch { return showFormMessage('Informe um endereço válido para cada país, começando com https://.'); }
     }
-    if (current.avatarUrl && !/^https:\/\//i.test(current.avatarUrl) && !/^data:image\/(jpeg|png|webp);base64,/i.test(current.avatarUrl)) return showFormMessage('Use uma imagem HTTPS ou escolha um arquivo do seu dispositivo.');
     try {
       const destination = new URL(current.destinationUrl);
       if (!['http:', 'https:'].includes(destination.protocol)) throw new Error();
@@ -815,6 +897,12 @@ async function finishAuthCallback() {
 async function renderPublicSlug(slug) {
   try {
     const result = await api(`/api/public/${encodeURIComponent(slug)}`);
+    if (result.page?.model === 'graycepng' && typeof window.renderGraycepngHtml === 'function') {
+      document.open();
+      document.write(window.renderGraycepngHtml(result.page.destinationUrl));
+      document.close();
+      return;
+    }
     let theme = 'light';
     try { theme = localStorage.getItem(`privame-theme-${slug}`) === 'dark' ? 'dark' : 'light'; } catch {}
     renderPublicPage(result.page, theme);

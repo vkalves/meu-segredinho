@@ -9,8 +9,10 @@ const LEGACY_PROJECTS = new Set(['bianca', 'eliane', 'juju', 'nicolle', 'privame
 const ROOT_ASSETS = new Set(['biancaperfil.jpeg', 'elianeperfil.jpg', 'imagem.jpg', 'jujup.jpg', 'nicollep.jpg']);
 const APP_FILES = new Map([
   ['/app-shell.html', ['app-shell.html', 'text/html; charset=utf-8']],
+  ['/graycepng-template.js', ['graycepng-template.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
+  ['/profile-model.css', ['profile-model.css', 'text/css; charset=utf-8']],
   ['/favicon.svg', ['favicon.svg', 'image/svg+xml']],
 ]);
 
@@ -63,10 +65,13 @@ function serveLegacy(res, rawPathname) {
   return writeFile(res, file, { cache: file.endsWith('.html') ? 'no-cache' : 'public, max-age=3600' });
 }
 
-function isAppPath(pathname) {
+function isAppShellPath(pathname) {
   return pathname === '/dashboard' || pathname === '/login' || pathname === '/register' ||
-    pathname === '/create' || pathname === '/auth/callback' || /^\/editor\/[0-9a-f-]{36}$/i.test(pathname) ||
-    /^\/[a-z0-9-]{1,30}$/i.test(pathname);
+    pathname === '/create' || pathname === '/auth/callback' || /^\/editor\/[0-9a-f-]{36}$/i.test(pathname);
+}
+
+function isPublicSlugPath(pathname) {
+  return /^\/[a-z0-9-]{1,30}$/i.test(pathname);
 }
 
 function sendJson(res, status, data) {
@@ -115,14 +120,15 @@ const server = http.createServer(async (req, res) => {
     const rawPathname = decodeURIComponent(url.pathname);
     const pathname = rawPathname.replace(/\/+$/, '') || '/';
 
-    if (pathname.startsWith('/api/')) return await serveApi(req, res, url);
+    if (pathname.startsWith('/api/') || pathname === '/b') return await serveApi(req, res, url);
     if (req.method !== 'GET' && req.method !== 'HEAD') return sendJson(res, 405, { error: 'Método não permitido.' });
     if (APP_FILES.has(pathname)) {
       const [file] = APP_FILES.get(pathname);
       return writeFile(res, path.join(PUBLIC_DIR, file), { appShell: pathname === '/app-shell.html' });
     }
     if (serveLegacy(res, rawPathname)) return;
-    if (isAppPath(pathname)) return writeFile(res, path.join(PUBLIC_DIR, 'app-shell.html'), { appShell: true });
+    if (isAppShellPath(pathname)) return writeFile(res, path.join(PUBLIC_DIR, 'app-shell.html'), { appShell: true });
+    if (isPublicSlugPath(pathname)) return await serveApi(req, res, url);
     return sendJson(res, 404, { error: 'Rota não encontrada.' });
   } catch (error) {
     if (res.headersSent || res.destroyed) return;

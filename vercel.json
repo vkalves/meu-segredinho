@@ -14,7 +14,8 @@
     { "source": "/editor/:id", "destination": "/app-shell.html" },
     { "source": "/auth/callback", "destination": "/app-shell.html" },
     { "source": "/vejamais", "destination": "/vejamais/index.html" },
-    { "source": "/:slug", "destination": "/app-shell.html" }
+    { "source": "/b", "destination": "/api/b" },
+    { "source": "/:slug", "destination": "/api/public/:slug?render=1" }
   ],
   "headers": [
     {
