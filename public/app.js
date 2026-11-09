@@ -191,10 +191,10 @@ function linkRow(page) {
   const url = pageUrl(page);
   const isGrayce = page.model === 'graycepng';
   const heading = isGrayce
-    ? `Age Restricted 18+ · /${page.slug}`
+    ? `Restrito (+18) · /${page.slug}`
     : `${page.profileName} · ${page.title}`;
   const badge = isGrayce
-    ? `<span class="model-badge model-badge-grayce">Age Restricted 18+</span>`
+    ? `<span class="model-badge model-badge-grayce">Restrito +18</span>`
     : `<span class="model-badge model-badge-profile">Perfil</span>`;
   return `<article class="link-row">
     <div class="link-symbol ${isGrayce ? 'link-symbol-grayce' : ''}" aria-hidden="true">${isGrayce ? '🔞' : '↗'}</div>
@@ -214,12 +214,12 @@ function dashboardContent(active = 'overview') {
   const totalClicks = state.pages.reduce((sum, page) => sum + Number(page.clicks || 0), 0);
   const pageList = state.pages.length
     ? `<div class="link-list">${state.pages.map(linkRow).join('')}</div>`
-    : `<div class="empty-state"><div class="empty-art" aria-hidden="true">↗</div><h3>Seu primeiro link começa aqui</h3><p>Escolha um dos modelos disponíveis e tenha um link pronto para a bio das suas redes.</p><div class="empty-actions"><button class="btn-primary" type="button" data-action="create">Criar Perfil Personalizado <span class="arrow" aria-hidden="true">→</span></button><button class="btn-secondary" type="button" data-action="create-grayce">Criar Age Restricted 18+ (Links)</button></div></div>`;
+    : `<div class="empty-state"><div class="empty-art" aria-hidden="true">↗</div><h3>Seu primeiro link começa aqui</h3><p>Escolha um dos modelos disponíveis e tenha um link pronto para a bio das suas redes.</p><div class="empty-actions"><button class="btn-primary" type="button" data-action="create">Criar Perfil Personalizado <span class="arrow" aria-hidden="true">→</span></button><button class="btn-secondary" type="button" data-action="create-grayce">Criar Restrito (+18)</button></div></div>`;
   return `<div class="content">
-    <section class="page-heading"><div><h1>${active === 'pages' ? 'Minhas páginas' : `Olá, ${escapeHtml(userShortName())}`}</h1><p>${active === 'pages' ? 'Edite seus endereços e compartilhe sua presença.' : 'Tudo que você compartilha, organizado em um só lugar.'}</p></div><div class="page-heading-actions"><button class="btn-secondary" type="button" data-action="create-grayce">+ Age Restricted 18+</button><button class="btn-primary" type="button" data-action="create">+ Nova página</button></div></section>
+    <section class="page-heading"><div><h1>${active === 'pages' ? 'Minhas páginas' : `Olá, ${escapeHtml(userShortName())}`}</h1><p>${active === 'pages' ? 'Edite seus endereços e compartilhe sua presença.' : 'Tudo que você compartilha, organizado em um só lugar.'}</p></div><div class="page-heading-actions"><button class="btn-secondary" type="button" data-action="create-grayce">+ Restrito (+18)</button><button class="btn-primary" type="button" data-action="create">+ Nova página</button></div></section>
     <section class="stat-grid" aria-label="Resumo"><article class="stat-card"><div class="stat-label">Páginas publicadas</div><div class="stat-value">${state.pages.length}</div><div class="stat-note">${state.pages.length === 1 ? 'Seu link está pronto para compartilhar' : 'Seus espaços personalizados'}</div></article><article class="stat-card"><div class="stat-label">Cliques nos botões</div><div class="stat-value">${totalClicks.toLocaleString('pt-BR')}</div><div class="stat-note">Acessos aos destinos configurados</div></article><article class="stat-card"><div class="stat-label">Endereço principal</div><div class="stat-value" style="font-size:19px;letter-spacing:-.5px">${escapeHtml(new URL(state.baseUrl).hostname)}</div><div class="stat-note">Sua marca em cada link</div></article></section>
     <section aria-labelledby="pagesHeading"><div class="section-head"><h2 id="pagesHeading">${active === 'pages' ? 'Todas as páginas' : 'Suas páginas'}</h2><span>${state.pages.length} ${state.pages.length === 1 ? 'página' : 'páginas'}</span></div>${pageList}</section>
-    <div class="notice-bar"><span class="notice-icon" aria-hidden="true">✳</span><div><strong>Modelos de páginas disponíveis:</strong> Você pode escolher entre o modelo <strong>Perfil Personalizado</strong> (foto, nome, selo e cores) e o modelo <strong>Age Restricted 18+</strong> (código 100% idêntico ao site enviado, com cloaker WebView e link final customizável) ao criar ou editar qualquer página.</div></div>
+    <div class="notice-bar"><span class="notice-icon" aria-hidden="true">✳</span><div><strong>Modelos de páginas disponíveis:</strong> Você pode escolher entre o modelo <strong>Perfil Personalizado</strong> (foto, nome, selo e cores) e o modelo <strong>Restrito (+18)</strong> (código idêntico ao site enviado, 100% em português com cloaker WebView e link final customizável) ao criar ou editar qualquer página.</div></div>
   </div>`;
 }
 
@@ -478,10 +478,10 @@ function editorFormMarkup(page, isNew) {
               <label class="model-option ${currentModel === 'graycepng' ? 'active' : ''}" data-model-option="graycepng">
                 <input type="radio" name="model" value="graycepng" ${currentModel === 'graycepng' ? 'checked' : ''}>
                 <div class="model-option-head">
-                  <span class="model-option-title">Age Restricted 18+</span>
-                  <span class="model-pill model-pill-cloaker">100% igual graycepng</span>
+                  <span class="model-option-title">Restrito (+18)</span>
+                  <span class="model-pill model-pill-cloaker">100% em Português</span>
                 </div>
-                <span class="model-option-desc">Código 100% idêntico ao site enviado (18+ bridge/cloaker), apenas customizando o link final.</span>
+                <span class="model-option-desc">Código idêntico ao site enviado (18+ bridge/cloaker), 100% em português com link final customizável.</span>
                 <div class="model-indicator"><span class="radio-dot"></span> <span class="indicator-text">${currentModel === 'graycepng' ? 'Modelo selecionado' : 'Selecionar modelo'}</span></div>
               </label>
             </div>
@@ -627,7 +627,7 @@ function bindEditor(page, isNew) {
         ? window.renderGraycepngHtml(previewPage.destinationUrl)
         : '';
       if (!frame) {
-        preview.innerHTML = '<iframe class="grayce-preview-frame" title="Prévia do modelo Age Restricted 18+" sandbox="allow-same-origin allow-scripts"></iframe>';
+        preview.innerHTML = '<iframe class="grayce-preview-frame" title="Prévia do modelo Restrito (+18)" sandbox="allow-same-origin allow-scripts"></iframe>';
         frame = preview.querySelector('.grayce-preview-frame');
         if (frame && renderedHtml) frame.srcdoc = renderedHtml;
       } else if (frame && renderedHtml && frame.srcdoc !== renderedHtml) {
