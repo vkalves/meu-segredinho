@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Continuar no Paylume Fans</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --surface:#f5f5f5;
+  --ink:#111111;
+  --muted:#A19679;
+  --accent:#0088CC;
+  --accent-dark:#0088CC;
+  --line:#eee;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+}
+.wrap{
+  width:100%;
+  max-width:460px;
+  margin:0 auto;
+  padding:28px 20px 36px;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(12,20,18,.28);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:20px;
+  animation:fadeIn .2s ease-out;
+}
+.popup{
+  width:100%;
+  max-width:380px;
+  background:#fff;
+  border-radius:20px;
+  padding:28px 24px 24px;
+  text-align:center;
+  box-shadow:0 20px 50px rgba(18,24,27,.18);
+  animation:popIn .25s ease-out;
+}
+.popup-title{
+  font-size:20px;
+  font-weight:900;
+  color:var(--accent);
+  margin:0 0 14px;
+}
+.popup-text{
+  font-size:16px;
+  line-height:1.5;
+  color:#333;
+  font-weight:600;
+  margin:0 0 22px;
+}
+.highlight{
+  color:var(--accent);
+  font-weight:900;
+}
+.popup-btn{
+  width:100%;
+  padding:14px;
+  border-radius:999px;
+  border:0;
+  font-weight:700;
+  font-size:15px;
+  cursor:pointer;
+  background:var(--accent);
+  color:#fff;
+}
+.kicker{
+  text-align:center;
+  color:var(--accent);
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.02em;
+  margin:0 0 8px;
+}
+.title{
+  text-align:center;
+  font-weight:800;
+  font-size:clamp(22px, 6vw, 27px);
+  line-height:1.2;
+  margin:0 0 22px;
+}
+.accent{color:var(--accent);}
+.mediaBox{
+  width:100%;
+  border-radius:16px;
+  overflow:hidden;
+  background:var(--surface);
+  border:1px solid var(--line);
+  margin:0 0 28px;
+}
+.mediaBox img{
+  width:100%;
+  display:block;
+}
+.tutorial-img{
+  opacity:1;
+  transition:opacity .35s ease-in-out;
+}
+.tutorial-img.is-fading{
+  opacity:0;
+}
+.steps{
+  list-style:none;
+  margin:0 0 28px;
+  padding:0;
+  position:relative;
+}
+.steps::before{
+  content:"";
+  position:absolute;
+  left:19px;
+  top:24px;
+  bottom:24px;
+  width:2px;
+  background:var(--line);
+}
+.step{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  position:relative;
+  z-index:1;
+}
+.step + .step{
+  margin-top:18px;
+}
+.step-num{
+  flex:0 0 40px;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-weight:800;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.step-title{
+  margin:0;
+  font-weight:700;
+  font-size:16px;
+  line-height:1.4;
+  padding-top:8px;
+}
+.step-hint{
+  margin:2px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+.cta{
+  width:100%;
+  border:0;
+  border-radius:999px;
+  padding:17px 16px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:16px;
+  color:#fff;
+  background:var(--accent-dark);
+}
+</style>
+</head>
+<body>
+<div class="overlay" id="popup">
+  <div class="popup">
+    <div class="popup-title">⚠️ AVISO</div>
+    <div class="popup-text">
+      Para continuar, abra esta página no navegador do seu dispositivo.
+      <br><br>
+      O botão abaixo levará você ao <span class="highlight">Paylume Fans</span>.
+    </div>
+    <button class="popup-btn" onclick="fecharPopup()">Entendi</button>
+  </div>
+</div>
+<div class="wrap">
+  <p class="kicker">Passo a passo</p>
+  <h1 class="title">Abra no <span class="accent">navegador</span> para continuar</h1>
+  <div class="mediaBox">
+    <img id="tutorialImagem" class="tutorial-img" alt="Tutorial para abrir esta página no navegador">
+  </div>
+  <ol class="steps">
+    <li class="step">
+      <span class="step-num">1</span>
+      <div>
+        <p class="step-title">Toque nos três pontinhos</p>
+        <p class="step-hint">Canto superior direito da tela</p>
+      </div>
+    </li>
+    <li class="step">
+      <span class="step-num">2</span>
+      <div>
+        <p class="step-title">Selecione "Abrir no navegador"</p>
+      </div>
+    </li>
+  </ol>
+  <button class="cta" onclick="window.location.href='https://paylume.fans/l/0c42ade9?shk=n33cj3ax'">
+    Continuar para o Paylume Fans
+  </button>
+</div>
+<script>
+function fecharPopup(){
+  document.getElementById("popup").style.display = "none";
+}
+const tutorialImagem = document.getElementById("tutorialImagem");
+const tutorialImagens = [
+  '/vejamais/tutorial-2.webp',
+  '/vejamais/tutorial-1.webp'
+];
+let tutorialIndice = 0;
+tutorialImagem.src = tutorialImagens[0];
+setInterval(() => {
+  tutorialImagem.classList.add("is-fading");
+  setTimeout(() => {
+    tutorialIndice = (tutorialIndice + 1) % tutorialImagens.length;
+    tutorialImagem.src = tutorialImagens[tutorialIndice];
+    tutorialImagem.classList.remove("is-fading");
+  }, 350);
+}, 4500);
+</script>
+</body>
+</html>
+

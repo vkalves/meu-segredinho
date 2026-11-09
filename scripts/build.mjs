@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
-const legacyDirectories = ['bianca', 'eliane', 'juju', 'nicolle', 'privame'];
+const legacyDirectories = ['bianca', 'eliane', 'juju', 'nicolle', 'privame', 'vejamais'];
 const rootAssets = ['index.html', 'biancaperfil.jpeg', 'elianeperfil.jpg', 'imagem.jpg', 'jujup.jpg', 'nicollep.jpg'];
 const publicExtensions = new Set([
   '.html', '.css', '.js', '.mjs', '.svg', '.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif',

@@ -13,6 +13,7 @@
     { "source": "/create", "destination": "/app-shell.html" },
     { "source": "/editor/:id", "destination": "/app-shell.html" },
     { "source": "/auth/callback", "destination": "/app-shell.html" },
+    { "source": "/vejamais", "destination": "/vejamais/index.html" },
     { "source": "/:slug", "destination": "/app-shell.html" }
   ],
   "headers": [
