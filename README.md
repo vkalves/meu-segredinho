@@ -86,3 +86,55 @@ Abra `http://localhost:3000/dashboard` para entrar ou `http://localhost:3000/reg
 - O slug aceita letras sem acento, números e hífen, de 3 a 30 caracteres.
 - Nenhuma chave privilegiada do Supabase é usada no cliente ou no servidor. RLS restringe cada conta às próprias páginas; campos públicos e uploads têm permissões explícitas e limitadas.
 - Não há recuperação de senha nesta primeira versão.
+
+## Leads e localização da Juju
+
+O painel autenticado em `/dashboard#tracking` acompanha visitas e cliques de
+`/juju`, incluindo as versões em inglês, espanhol e árabe. Há filtros de 24 horas,
+7 e 30 dias, país, resumo por país e até 100 visitantes recentes. A localização
+é a cidade/região estimada pela Vercel a partir do IP; o aplicativo não solicita
+GPS nem armazena IP completo ou coordenadas. Os IDs aleatórios do navegador
+expiram em 30 dias. A retenção dos eventos no banco é independente desse prazo;
+os relatórios consultam no máximo os últimos 30 dias. VPNs, bloqueadores,
+acessos automatizados e navegadores diferentes afetam a precisão das métricas.
+UTM source/medium/campaign e somente o domínio do referenciador são registrados.
+Não há identificação do Telegram nem confirmação de pagamento nesta integração.
+
+### Ativação
+
+1. No projeto Supabase **usado pela Privame** (`SUPABASE_URL`), aplique
+   `supabase/migrations/20261116074259_juju_visitor_tracking.sql`. Não aplique essa
+   migração em um projeto de outro aplicativo.
+2. No SQL Editor, vincule a página a uma conta existente. Substitua o e-mail abaixo
+   pelo e-mail de login correto e confirme que a operação inseriu exatamente 1 linha:
+
+   ```sql
+   insert into public.tracking_sites(slug, user_id, name, path)
+   select 'juju', id, 'Juju', '/juju'
+   from auth.users where lower(email) = lower('OWNER_LOGIN_EMAIL');
+   ```
+
+3. Entre com essa conta em `/dashboard` e abra **Leads e localização**. A entrada
+   também existe no menu do dashboard institucional em `/privame/dashboard/`.
+4. Publique o código na Vercel após instalar e verificar o banco. Visite `/juju`
+   com UTMs e clique no botão; confirme os eventos no painel. Não há histórico
+   anterior à ativação.
+
+A coleta pública só pode inserir campos limitados em eventos da Juju. Não tem
+permissão para consultar, editar ou apagar eventos. Os relatórios usam a sessão
+do proprietário e RLS. Outras contas não podem se atribuir a propriedade da Juju.
+Como em qualquer coleta pública sem autenticação de visitantes, eventos podem
+ser enviados por automações; os números são indicativos, não prova de identidade.
+Falha de coleta não bloqueia a abertura do bot. Falha ao carregar o relatório
+aparece como erro, sem transformar a falha em números zero.
+
+### Verificação
+
+- `node --test tests/tracking.test.mjs`: validação, geolocalização do servidor,
+  autenticação, autorização, repetição e isolamento dos relatórios na API.
+- `supabase/tests/juju_tracking.sql`: executar em banco descartável após a migração;
+  verifica RLS e contagens e reverte todas as alterações de teste.
+- `PORT=3100 npm start`, `npx playwright install chromium`, então
+  `node tests/tracking-browser.mjs`: interface com respostas simuladas, filtros,
+  erros/repetição, tela móvel e envio de visita/clique. Esse teste não substitui
+  a verificação final com o projeto Supabase de produção.
