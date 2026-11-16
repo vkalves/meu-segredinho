@@ -64,10 +64,6 @@
     }
   ],
   "proxy": {
-    "entrypoint": "middleware.js",
-    "matcher": [
-      "/juju",
-      "/juju/:path*"
-    ]
+    "entrypoint": "middleware.js"
   }
 }
