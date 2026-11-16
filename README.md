@@ -4,11 +4,17 @@
 
 Na Vercel, `/juju`, `/juju/` e `/juju/index.html` mostram a página original para
 Brasil e localização desconhecida. Para os demais países identificados, o
-middleware serve a versão em inglês no mesmo endereço, com o botão direcionado
+middleware escolhe espanhol para países hispanófonos, árabe para países árabes
+e inglês para os demais países, no mesmo endereço, com o botão direcionado
 para `https://abrir.link/BBiZW`. O build gera essa versão a partir do HTML
 original, preservando o layout. Não há consulta externa de IP nem armazenamento
 do IP. VPNs podem alterar o país identificado. O fluxo continua exigindo o
 clique no botão para abrir o Telegram.
+
+As versões são geradas em `/juju/international.html` (inglês), `/juju/es.html`
+(espanhol) e `/juju/ar.html` (árabe, com direção de leitura da direita para a
+esquerda). O mapa de países fica em `lib/juju-locale.mjs`. A seleção usa o país
+do IP, que não necessariamente corresponde ao idioma pessoal do visitante.
 
 Essa seleção de país depende do middleware da Vercel; `npm start` continua
 servindo a página estática original localmente.

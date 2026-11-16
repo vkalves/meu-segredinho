@@ -1,5 +1,6 @@
 import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
 import { internationalJujuHtml } from '../lib/juju-international.mjs';
+import { JUJU_LOCALE_PATHS } from '../lib/juju-locale.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +30,8 @@ for (const name of legacyDirectories) {
   });
 }
 await cp(path.join(root, 'public'), output, { recursive: true, force: true });
-await writeFile(path.join(output, 'juju/international.html'),
-  internationalJujuHtml(await readFile(path.join(root, 'juju/index.html'), 'utf8')));
+const jujuOriginal = await readFile(path.join(root, 'juju/index.html'), 'utf8');
+for (const [locale, destination] of Object.entries(JUJU_LOCALE_PATHS)) {
+  await writeFile(path.join(output, destination.slice(1)), internationalJujuHtml(jujuOriginal, locale));
+}
 console.log('Static output created at dist/.');
