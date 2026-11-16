@@ -12,6 +12,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/tracking/:action",
+      "destination": "/api/tracking?action=:action"
+    },
+    {
       "source": "/dashboard",
       "destination": "/app-shell.html"
     },
