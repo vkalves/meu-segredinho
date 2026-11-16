@@ -13,7 +13,7 @@ clique no botão para abrir o Telegram.
 
 As versões são geradas em `/juju/international.html` (inglês), `/juju/es.html`
 (espanhol) e `/juju/ar.html` (árabe, com direção de leitura da direita para a
-esquerda). O mapa de países fica em `lib/juju-locale.mjs`. A seleção usa o país
+esquerda). O mapa de países fica em `lib/juju-locale.cjs`. A seleção usa o país
 do IP, que não necessariamente corresponde ao idioma pessoal do visitante.
 
 Essa seleção de país depende do middleware da Vercel; `npm start` continua

@@ -1,5 +1,5 @@
 import { geolocation, next, rewrite } from '@vercel/functions';
-import { jujuLocale, JUJU_LOCALE_PATHS } from './lib/juju-locale.mjs';
+import { jujuLocale, JUJU_LOCALE_PATHS } from './lib/juju-locale.cjs';
 
 export const config = { matcher: ['/juju', '/juju/:path*'] };
 

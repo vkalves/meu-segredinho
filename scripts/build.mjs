@@ -1,6 +1,6 @@
 import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
 import { internationalJujuHtml } from '../lib/juju-international.mjs';
-import { JUJU_LOCALE_PATHS } from '../lib/juju-locale.mjs';
+import { JUJU_LOCALE_PATHS } from '../lib/juju-locale.cjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
