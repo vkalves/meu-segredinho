@@ -1,4 +1,5 @@
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
+import { internationalJujuHtml } from '../lib/juju-international.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -28,4 +29,6 @@ for (const name of legacyDirectories) {
   });
 }
 await cp(path.join(root, 'public'), output, { recursive: true, force: true });
+await writeFile(path.join(output, 'juju/international.html'),
+  internationalJujuHtml(await readFile(path.join(root, 'juju/index.html'), 'utf8')));
 console.log('Static output created at dist/.');
