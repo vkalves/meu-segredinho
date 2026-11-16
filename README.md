@@ -5,7 +5,7 @@
 Na Vercel, `/juju`, `/juju/` e `/juju/index.html` mostram a página original para
 Brasil e localização desconhecida. Para os demais países identificados, o
 middleware serve a versão em inglês no mesmo endereço, com o botão direcionado
-para `https://t.me/jujugringbot`. O build gera essa versão a partir do HTML
+para `https://abrir.link/BBiZW`. O build gera essa versão a partir do HTML
 original, preservando o layout. Não há consulta externa de IP nem armazenamento
 do IP. VPNs podem alterar o país identificado. O fluxo continua exigindo o
 clique no botão para abrir o Telegram.
