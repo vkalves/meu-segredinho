@@ -169,6 +169,7 @@ function sidebar(active = 'overview') {
     <nav class="side-nav" aria-label="Navegação principal">
       <a class="side-link ${active === 'overview' ? 'active' : ''}" href="/dashboard" data-link><span class="side-icon">◫</span>Visão geral</a>
       <a class="side-link ${active === 'pages' ? 'active' : ''}" href="/dashboard#pages" data-link><span class="side-icon">↗</span>Minhas páginas</a>
+      <a class="side-link ${active === 'tracking' ? 'active' : ''}" href="/dashboard#tracking" data-link><span class="side-icon">◎</span>Leads e localização</a>
     </nav>
     <div class="sidebar-bottom">
       <div class="sidebar-help"><strong>Feito para compartilhar</strong><p>Seu endereço curto fica pronto para colocar na bio das suas redes.</p></div>
@@ -178,7 +179,7 @@ function sidebar(active = 'overview') {
 }
 
 function shell(content, active = 'overview') {
-  app.innerHTML = `<div class="dashboard">${sidebar(active)}<main class="main-area"><header class="topbar"><span class="crumb">Privame <span aria-hidden="true">/</span> ${active === 'pages' ? 'Minhas páginas' : 'Seu espaço'}</span><div class="topbar-right"><span class="topbar-note">Um lugar só seu para compartilhar</span></div></header>${content}</main></div>`;
+  app.innerHTML = `<div class="dashboard">${sidebar(active)}<main class="main-area"><header class="topbar"><span class="crumb">Privame <span aria-hidden="true">/</span> ${active === 'tracking' ? 'Leads e localização' : active === 'pages' ? 'Minhas páginas' : 'Seu espaço'}</span><div class="topbar-right"><span class="topbar-note">Um lugar só seu para compartilhar</span></div></header>${content}</main></div>`;
   bindInternalLinks();
   document.querySelector('[data-logout]')?.addEventListener('click', logout);
 }
@@ -221,6 +222,69 @@ function dashboardContent(active = 'overview') {
     <section aria-labelledby="pagesHeading"><div class="section-head"><h2 id="pagesHeading">${active === 'pages' ? 'Todas as páginas' : 'Suas páginas'}</h2><span>${state.pages.length} ${state.pages.length === 1 ? 'página' : 'páginas'}</span></div>${pageList}</section>
     <div class="notice-bar"><span class="notice-icon" aria-hidden="true">✳</span><div><strong>Modelos de páginas disponíveis:</strong> Você pode escolher entre o modelo <strong>Perfil Personalizado</strong> (foto, nome, selo e cores) e o modelo <strong>Restrito (+18)</strong> (código idêntico ao site enviado, 100% em português com cloaker WebView e link final customizável) ao criar ou editar qualquer página.</div></div>
   </div>`;
+}
+
+const trackingFilters = { site: 'juju', days: 7, country: '' };
+let trackingLoadId = 0;
+function countryName(code) {
+  if (!code) return 'Não identificado';
+  try { return new Intl.DisplayNames(['pt-BR'], { type: 'region' }).of(code) || code; }
+  catch { return code; }
+}
+function trackingDate(value) {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' }) : '—';
+}
+function trackingReportMarkup(report) {
+  const summary = report.summary || {};
+  const visitors = Array.isArray(report.visitors) ? report.visitors : [];
+  const countries = Array.isArray(report.countries) ? report.countries : [];
+  const count = (value) => Number(value || 0).toLocaleString('pt-BR');
+  const conversion = summary.visitors ? (100 * Number(summary.clickedVisitors || 0) / summary.visitors).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '0';
+  const cards = [['Visitantes únicos', count(summary.visitors)], ['Visitas à página', count(summary.views)], ['Cliques no botão', count(summary.clicks)], ['Visitantes que clicaram', conversion + '%']];
+  return `<section class="stat-grid tracking-stats" aria-label="Resumo de acessos">${cards.map(([label,value]) => `<article class="stat-card"><div class="stat-label">${label}</div><div class="stat-value">${value}</div></article>`).join('')}</section>
+    <section class="tracking-countries"><div class="section-head"><h2>Origem dos visitantes</h2><span>Todos os países no período</span></div>${countries.length ? `<div class="tracking-country-grid">${countries.map((row) => `<button type="button" class="tracking-country ${trackingFilters.country === row.country ? 'selected' : ''}" data-tracking-country="${escapeHtml(row.country)}"><strong>${escapeHtml(countryName(row.country))}</strong><span>${count(row.visitors)} visitantes · ${count(row.clicks)} cliques</span></button>`).join('')}</div>` : '<p>Nenhum acesso registrado neste período.</p>'}</section>
+    <section><div class="section-head"><h2>Visitantes recentes</h2><span>Até 100 visitantes · horário de Brasília</span></div>
+    ${visitors.length ? `<div class="tracking-table-wrap"><table class="tracking-table"><thead><tr><th>Visitante anônimo</th><th>Localização estimada</th><th>Idioma</th><th>Origem / campanha</th><th>Último acesso</th><th>Atividade</th></tr></thead><tbody>${visitors.map((row) => {
+      const location = [row.city, row.region, countryName(row.country)].filter(Boolean).join(', ');
+      const origin = [row.utm_source || row.referrer_host || 'Direto / não informado', row.utm_medium, row.utm_campaign].filter(Boolean).join(' · ');
+      return `<tr><td><code title="${escapeHtml(row.visitor_id)}">${escapeHtml(String(row.visitor_id).slice(0,8))}</code></td><td>${escapeHtml(location)}</td><td>${escapeHtml(({ 'pt-BR':'Português', en:'Inglês', es:'Espanhol', ar:'Árabe' })[row.locale] || row.locale)}</td><td>${escapeHtml(origin)}</td><td>${escapeHtml(trackingDate(row.last_seen))}</td><td>${count(row.views)} visitas<br><strong>${count(row.clicks)} cliques</strong></td></tr>`;
+    }).join('')}</tbody></table></div>` : '<div class="empty-state"><h3>Nenhum visitante neste filtro</h3><p>Os acessos começarão a aparecer após a ativação do rastreamento.</p></div>'}</section>`;
+}
+async function renderTracking() {
+  const loadId = ++trackingLoadId;
+  const current = () => loadId === trackingLoadId && location.pathname.replace(/\/+$/, '') === '/dashboard' && location.hash === '#tracking';
+  document.title = 'Leads e localização — Privame';
+  shell(`<div class="content"><section class="page-heading"><div><h1>Leads e localização</h1><p>Acompanhe as visitas e os cliques da página Juju.</p></div><a class="btn-secondary" href="/juju" target="_blank" rel="noopener noreferrer">Abrir site da Juju ↗</a></section><div class="notice-bar"><div>Localização aproximada pelo IP, sem GPS. Um visitante não equivale a um contato identificado no Telegram. VPNs e redes móveis podem alterar a cidade; outro navegador aparece como outro visitante.</div></div><div id="trackingContent" aria-live="polite"><p>Carregando acessos...</p></div></div>`, 'tracking');
+  const container = document.getElementById('trackingContent');
+  try {
+    const { sites } = await api('/api/tracking/sites');
+    if (!current()) return;
+    if (!sites?.length) {
+      container.innerHTML = '<div class="empty-state"><h3>Juju ainda não vinculada à sua conta</h3><p>O responsável pela instalação precisa vincular a página ao e-mail usado no login. Nenhum dado de outra conta é exibido.</p></div>';
+      return;
+    }
+    if (!sites.some((site) => site.slug === trackingFilters.site)) trackingFilters.site = sites[0].slug;
+    const params = new URLSearchParams({ site: trackingFilters.site, days: trackingFilters.days, country: trackingFilters.country });
+    const { report } = await api('/api/tracking/report?' + params);
+    if (!current()) return;
+    const countries = Array.isArray(report.countries) ? report.countries : [];
+    container.innerHTML = `<form class="tracking-filters" id="trackingFilters"><label>Site<select name="site">${sites.map((site) => `<option value="${escapeHtml(site.slug)}" ${site.slug===trackingFilters.site?'selected':''}>${escapeHtml(site.name)}</option>`).join('')}</select></label><label>Período<select name="days">${[[1,'Últimas 24 horas'],[7,'Últimos 7 dias'],[30,'Últimos 30 dias']].map(([days,label]) => `<option value="${days}" ${days===trackingFilters.days?'selected':''}>${label}</option>`).join('')}</select></label><label>País<select name="country"><option value="">Todos os países</option>${countries.filter((row) => row.country).map((row) => `<option value="${escapeHtml(row.country)}" ${row.country===trackingFilters.country?'selected':''}>${escapeHtml(countryName(row.country))}</option>`).join('')}</select></label><button type="submit" class="btn-primary">Atualizar</button></form>${trackingReportMarkup(report)}<p class="tracking-footnote">Atualizado às ${escapeHtml(new Date().toLocaleTimeString('pt-BR', { timeZone:'America/Sao_Paulo' }))}. Dados coletados a partir da ativação. Identificadores de navegador duram até 30 dias; sem histórico de GPS ou localização em tempo real.</p>`;
+    document.getElementById('trackingFilters').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      Object.assign(trackingFilters, { site: form.elements.site.value, days: Number(form.elements.days.value), country: form.elements.country.value });
+      renderTracking();
+    });
+    container.querySelectorAll('[data-tracking-country]').forEach((button) => button.addEventListener('click', () => {
+      trackingFilters.country = button.dataset.trackingCountry;
+      renderTracking();
+    }));
+  } catch (error) {
+    if (!current()) return;
+    container.innerHTML = '<div class="empty-state"><h3>Não foi possível carregar o rastreamento</h3><p>Confira se a integração do banco está instalada e se sua conta tem acesso. As visitas não são exibidas como zero quando há uma falha.</p><button type="button" class="btn-secondary" id="retryTracking">Tentar novamente</button></div>';
+    document.getElementById('retryTracking').addEventListener('click', renderTracking);
+  }
 }
 
 function renderDashboard(active = 'overview') {
@@ -978,6 +1042,7 @@ async function renderRoute() {
   }
   if (route === '/dashboard') {
     if (!state.user) return go('/login', true);
+    if (window.location.hash === '#tracking') return renderTracking();
     try {
       await loadPages();
       renderDashboard(window.location.hash === '#pages' ? 'pages' : 'overview');
