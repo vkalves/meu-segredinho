@@ -138,3 +138,26 @@ aparece como erro, sem transformar a falha em números zero.
   `node tests/tracking-browser.mjs`: interface com respostas simuladas, filtros,
   erros/repetição, tela móvel e envio de visita/clique. Esse teste não substitui
   a verificação final com o projeto Supabase de produção.
+
+## Rastreamento em todo o site
+
+O coletor `/site-tracking.js` acompanha as páginas públicas antigas e os perfis
+criados pelo painel, inclusive o modelo Restrito. O build injeta o coletor uma
+única vez nos HTMLs públicos. Login, cadastro, editor e dashboards não geram
+visitas. Cliques são saídas para outros domínios ou para os destinos dos perfis;
+a métrica mantém no máximo um clique por exibição da página, como na Juju.
+
+A migração `20261117012217_sitewide_visitor_tracking.sql` cadastra as páginas
+antigas na mesma conta proprietária da Juju e sincroniza automaticamente os
+perfis com `pages.user_id`. Cada conta consulta somente suas próprias páginas.
+Novos perfis entram no rastreamento automaticamente; renomear o slug mantém os
+eventos existentes, e excluir o perfil remove seu rastreamento. O visitante usa
+um único ID aleatório de navegador no domínio, preservando o ID antigo da Juju.
+O painel **Leads e localização** permite selecionar o site acompanhado.
+
+Testes adicionais: `tests/sitewide-tracking-browser.mjs` usa o build servido por
+um servidor estático na porta 3101 e respostas simuladas de API; cobre páginas
+antigas, idiomas, perfil dinâmico, clique, deduplicação e exclusão do dashboard.
+`supabase/tests/sitewide_tracking.sql` verifica cadastro automático, renomeação,
+remoção, rejeição de sites inexistentes e isolamento dos relatórios em fixture
+Postgres descartável.

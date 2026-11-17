@@ -11,7 +11,8 @@ test('coarse location comes from server headers; IP, referrer paths and browser 
   assert.equal(result.country,'ES'); assert.equal(result.city,'Málaga'); assert.equal(result.locale,'es');
   assert.equal(result.referrer_host,'example.com'); assert.equal(result.utm_source.length,100);
   assert.ok(!JSON.stringify(result).includes('192.0.2.1')); assert.ok(!JSON.stringify(result).includes('not-stored')); assert.ok(!('latitude' in result));
-  assert.throws(()=>trackingEvent(request,{...payload,site:'other'}));
+  assert.equal(trackingEvent(request,{...payload,site:'bianca',locale:'pt-BR'}).site_id,'bianca');
+  assert.throws(()=>trackingEvent(request,{...payload,site:'../dashboard'}));
   assert.throws(()=>trackingEvent(request,{...payload,eventId:'invalid'}));
 });
 

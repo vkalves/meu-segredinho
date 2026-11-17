@@ -255,16 +255,17 @@ async function renderTracking() {
   const loadId = ++trackingLoadId;
   const current = () => loadId === trackingLoadId && location.pathname.replace(/\/+$/, '') === '/dashboard' && location.hash === '#tracking';
   document.title = 'Leads e localização — Privame';
-  shell(`<div class="content"><section class="page-heading"><div><h1>Leads e localização</h1><p>Acompanhe as visitas e os cliques da página Juju.</p></div><a class="btn-secondary" href="/juju" target="_blank" rel="noopener noreferrer">Abrir site da Juju ↗</a></section><div class="notice-bar"><div>Localização aproximada pelo IP, sem GPS. Um visitante não equivale a um contato identificado no Telegram. VPNs e redes móveis podem alterar a cidade; outro navegador aparece como outro visitante.</div></div><div id="trackingContent" aria-live="polite"><p>Carregando acessos...</p></div></div>`, 'tracking');
+  shell(`<div class="content"><section class="page-heading"><div><h1>Leads e localização</h1><p>Acompanhe as visitas e os cliques das suas páginas.</p></div><a class="btn-secondary" id="trackingSiteLink" href="/juju" target="_blank" rel="noopener noreferrer">Abrir site ↗</a></section><div class="notice-bar"><div>Localização aproximada pelo IP, sem GPS. Um visitante não equivale a um contato identificado no Telegram. VPNs e redes móveis podem alterar a cidade; outro navegador aparece como outro visitante.</div></div><div id="trackingContent" aria-live="polite"><p>Carregando acessos...</p></div></div>`, 'tracking');
   const container = document.getElementById('trackingContent');
   try {
     const { sites } = await api('/api/tracking/sites');
     if (!current()) return;
     if (!sites?.length) {
-      container.innerHTML = '<div class="empty-state"><h3>Juju ainda não vinculada à sua conta</h3><p>O responsável pela instalação precisa vincular a página ao e-mail usado no login. Nenhum dado de outra conta é exibido.</p></div>';
+      container.innerHTML = '<div class="empty-state"><h3>Nenhum site vinculado à sua conta</h3><p>O responsável pela instalação precisa vincular suas páginas ao e-mail usado no login. Nenhum dado de outra conta é exibido.</p></div>';
       return;
     }
     if (!sites.some((site) => site.slug === trackingFilters.site)) trackingFilters.site = sites[0].slug;
+    document.getElementById('trackingSiteLink').href = sites.find(site => site.slug === trackingFilters.site).path;
     const params = new URLSearchParams({ site: trackingFilters.site, days: trackingFilters.days, country: trackingFilters.country });
     const { report } = await api('/api/tracking/report?' + params);
     if (!current()) return;
@@ -833,6 +834,7 @@ function renderEditor(page, isNew) {
 }
 
 function renderPublicPage(page, theme = 'light') {
+  window.PrivameTracking?.trackPage(page.slug);
   document.body.classList.add('legacy-profile-active');
   document.title = (page.profileName || 'Perfil') + ' | ' + (page.title || 'Privame');
   app.innerHTML = profileMarkup(page, { theme });
@@ -1001,7 +1003,7 @@ async function renderPublicSlug(slug) {
     const result = await api(`/api/public/${encodeURIComponent(slug)}`);
     if (result.page?.model === 'graycepng' && typeof window.renderGraycepngHtml === 'function') {
       document.open();
-      document.write(window.renderGraycepngHtml(result.page.destinationUrl));
+      document.write(window.renderGraycepngHtml(result.page.destinationUrl).replace('</body>', '<script defer src="/site-tracking.js" data-site="' + escapeHtml(slug) + '"></script></body>'));
       document.close();
       return;
     }
@@ -1012,6 +1014,7 @@ async function renderPublicSlug(slug) {
 }
 
 async function renderRoute() {
+  window.PrivameTracking?.stop();
   document.body.classList.remove('legacy-profile-active');
   const pathname = decodeURIComponent(window.location.pathname.replace(/\/$/, '') || '/');
   const route = pathname === '/' ? '/' : pathname;

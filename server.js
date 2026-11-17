@@ -8,6 +8,7 @@ const PORT = Number(process.env.PORT || 3000);
 const LEGACY_PROJECTS = new Set(['bianca', 'eliane', 'juju', 'nicolle', 'privame', 'vejamais']);
 const ROOT_ASSETS = new Set(['biancaperfil.jpeg', 'elianeperfil.jpg', 'imagem.jpg', 'jujup.jpg', 'nicollep.jpg']);
 const APP_FILES = new Map([
+  ['/site-tracking.js', ['site-tracking.js', 'text/javascript; charset=utf-8']],
   ['/juju-tracking.js', ['juju-tracking.js', 'text/javascript; charset=utf-8']],
   ['/app-shell.html', ['app-shell.html', 'text/html; charset=utf-8']],
   ['/graycepng-template.js', ['graycepng-template.js', 'text/javascript; charset=utf-8']],

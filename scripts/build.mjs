@@ -1,4 +1,5 @@
-import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
+import { withTracking } from '../lib/tracking-html.mjs';
+import { cp, mkdir, rm, readFile, writeFile, readdir } from 'node:fs/promises';
 import { internationalJujuHtml } from '../lib/juju-international.mjs';
 import { JUJU_LOCALE_PATHS } from '../lib/juju-locale.cjs';
 import path from 'node:path';
@@ -34,4 +35,16 @@ const jujuOriginal = await readFile(path.join(root, 'juju/index.html'), 'utf8');
 for (const [locale, destination] of Object.entries(JUJU_LOCALE_PATHS)) {
   await writeFile(path.join(output, destination.slice(1)), internationalJujuHtml(jujuOriginal, locale));
 }
+async function instrument(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    const relative = path.relative(output, file).split(path.sep).join('/');
+    if (relative === 'privame/dashboard') continue;
+    if (entry.isDirectory()) { await instrument(file); continue; }
+    if (!entry.name.endsWith('.html') || relative === 'app-shell.html') continue;
+    const site = relative === 'index.html' ? 'principal' : relative.split('/')[0];
+    if (['principal', ...legacyDirectories].includes(site)) await writeFile(file, withTracking(await readFile(file,'utf8'),site));
+  }
+}
+await instrument(output);
 console.log('Static output created at dist/.');
