@@ -853,6 +853,7 @@ function renderPublicPage(page, theme = 'light') {
       const nextTheme = root.classList.contains('dark-mode') ? 'light' : 'dark';
       try { localStorage.setItem('privame-theme-' + page.slug, nextTheme); } catch {}
       renderPublicPage(page, nextTheme);
+      if (page.slug === 'biancay') localizeBiancaInterface(document.documentElement.lang);
     });
   }
 
