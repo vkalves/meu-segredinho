@@ -996,6 +996,64 @@ async function finishAuthCallback() {
   }
 }
 
+// Bianca's locale follows the same country-to-language mapping used by /juju.
+const BIANCA_COPY = {
+  en: {
+    'Ficou Curioso?': 'Feeling curious?', 'Ficou curiosa?': 'Feeling curious?',
+    'MEU TELEGRAM': 'MY TELEGRAM', 'MEU TLEGRAM': 'MY TELEGRAM',
+    'MEU LINK': 'MY LINK', 'ACESSE MEU LINK': 'OPEN MY LINK',
+    'online agora': 'online now', 'site seguro e anônimo': 'safe and anonymous site',
+    'Conta verificada': 'Verified account', 'abrindo seu link...': 'opening your link...',
+    'Ativar modo escuro': 'Enable dark mode', 'Ativar modo claro': 'Enable light mode',
+    'sim, eu tenho... vem ver meus conteúd0s que nao posto em nenhum outro lugar': "Yes, I do... come see the content I don't post anywhere else",
+  },
+  es: {
+    'Ficou Curioso?': '¿Te da curiosidad?', 'Ficou curiosa?': '¿Te da curiosidad?',
+    'MEU TELEGRAM': 'MI TELEGRAM', 'MEU TLEGRAM': 'MI TELEGRAM',
+    'MEU LINK': 'MI ENLACE', 'ACESSE MEU LINK': 'ABRE MI ENLACE',
+    'online agora': 'en línea ahora', 'site seguro e anônimo': 'sitio seguro y anónimo',
+    'Conta verificada': 'Cuenta verificada', 'abrindo seu link...': 'abriendo tu enlace...',
+    'Ativar modo escuro': 'Activar modo oscuro', 'Ativar modo claro': 'Activar modo claro',
+    'sim, eu tenho... vem ver meus conteúd0s que nao posto em nenhum outro lugar': 'Sí, tengo... ven a ver el contenido que no publico en ningún otro lugar',
+  },
+  ar: {
+    'Ficou Curioso?': 'هل أنت فضولي؟', 'Ficou curiosa?': 'هل أنت فضولي؟',
+    'MEU TELEGRAM': 'حسابي على تيليجرام', 'MEU TLEGRAM': 'حسابي على تيليجرام',
+    'MEU LINK': 'رابطي', 'ACESSE MEU LINK': 'افتح رابطي',
+    'online agora': 'متصلة الآن', 'site seguro e anônimo': 'موقع آمن ومجهول الهوية',
+    'Conta verificada': 'حساب موثّق', 'abrindo seu link...': 'جارٍ فتح الرابط...',
+    'Ativar modo escuro': 'تفعيل الوضع الداكن', 'Ativar modo claro': 'تفعيل الوضع الفاتح',
+    'sim, eu tenho... vem ver meus conteúd0s que nao posto em nenhum outro lugar': 'نعم، لدي المزيد... تعال وشاهد محتواي الذي لا أنشره في أي مكان آخر',
+  },
+};
+function localizeBiancaPage(page, locale) {
+  const copy = BIANCA_COPY[locale];
+  if (!copy) return page;
+  const translate = (value) => {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    const exact = copy[trimmed] || Object.entries(copy).find(([key]) => key.toLocaleLowerCase('pt-BR') === trimmed.toLocaleLowerCase('pt-BR'))?.[1];
+    return exact || value;
+  };
+  return { ...page, title: translate(page.title), subtitle: translate(page.subtitle),
+    buttonLabel: translate(page.buttonLabel), onlineLabel: translate(page.onlineLabel),
+    secureLabel: translate(page.secureLabel) };
+}
+function localizeBiancaInterface(locale) {
+  const copy = BIANCA_COPY[locale];
+  if (!copy) return;
+  document.documentElement.lang = locale;
+  document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+  const root = app.querySelector('.legacy-profile-page');
+  if (!root) return;
+  const redirectText = root.querySelector('.redirect-text');
+  if (redirectText) redirectText.textContent = copy['abrindo seu link...'];
+  const verified = root.querySelector('#verifiedIcon');
+  if (verified) verified.setAttribute('aria-label', copy['Conta verificada']);
+  const theme = root.querySelector('#themeToggle');
+  if (theme) theme.setAttribute('aria-label', copy['Ativar modo escuro']);
+}
+
 async function renderPublicSlug(slug) {
   try {
     const result = await api(`/api/public/${encodeURIComponent(slug)}`);
@@ -1007,7 +1065,10 @@ async function renderPublicSlug(slug) {
     }
     let theme = 'light';
     try { theme = localStorage.getItem(`privame-theme-${slug}`) === 'dark' ? 'dark' : 'light'; } catch {}
-    renderPublicPage(result.page, theme);
+    const locale = slug === 'biancay' ? result.locale : 'pt-BR';
+    const page = slug === 'biancay' ? localizeBiancaPage(result.page, locale) : result.page;
+    renderPublicPage(page, theme);
+    if (slug === 'biancay') localizeBiancaInterface(locale);
   } catch { notFound(); }
 }
 
